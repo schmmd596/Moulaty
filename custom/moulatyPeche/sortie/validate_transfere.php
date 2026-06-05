@@ -106,9 +106,9 @@ foreach ($produits as $objProd) {
     $product->fetch($objProd->fk_product);
 
     $product->correct_stock($user, $sortie->fk_entrepot_source, -$objProd->poids_total, 0,
-        'Transfert interne - Sortie #'.$sortie->ref);
+        'Transfert interne - Sortie #'.$sortie->ref, $product->pmp);
     $product->correct_stock($user, $sortie->fk_entrepot_dest, $objProd->poids_total, 0,
-        'Transfert interne - Entrée lot #'.$refLot);
+        'Transfert interne - Entrée lot #'.$refLot, $product->pmp);
 }
 
       $db->query("UPDATE ".MAIN_DB_PREFIX."pech_sortie SET statut = 2 WHERE rowid = ".((int)$id));

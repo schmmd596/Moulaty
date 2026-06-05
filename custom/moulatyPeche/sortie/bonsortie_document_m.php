@@ -91,6 +91,7 @@ while ($obj = $db->fetch_object($resProd)) {
     $linesProd[] = $obj;
     $total_poids_produits += $obj->total_poids;
     $total_valeur_produits += $obj->valeur;
+    $total_cartons_all += $obj->nb_carton;
 }
 
 // ============================================================================
@@ -379,12 +380,12 @@ $pdf->MultiCell($prodHeaderWidths[4], 14, $valeur_devise_label, 1, 'C', 1);
 $pdf->SetY($startY + 14);
 }
 
-// Calcul du supplément pour la répartition des frais (inchangé)
+// Calcul du supplément pour la répartition des frais par carton
 $nb_lignes = count($linesProd);
-$supplement = 0;
+$frais_par_carton = 0;
 
-if ($nb_lignes > 0) {
-    $supplement = ($total_montant_services + $total_facture) / $nb_lignes;
+if (isset($total_cartons_all) && $total_cartons_all > 0) {
+    $frais_par_carton = ($total_montant_services + $total_facture) / $total_cartons_all;
 }
 
 // Lignes des produits avec 2 décimales
@@ -399,11 +400,13 @@ foreach ($linesProd as $line) {
         $pdf->SetFillColor(255, 255, 255);
     }
     
-    $valeur_recalculee = $line->valeur + $supplement;
-    $total_valeur_recalculee += $valeur_recalculee;
+    $pu_initial = ($line->nb_carton > 0) ? $line->valeur / $line->nb_carton : 0;
     
-    // Calculer le PU par carton
-    $pu_par_carton = ($line->nb_carton > 0) ? $valeur_recalculee / $line->nb_carton : 0;
+    // Calculer le PU par carton et la valeur totale
+    $pu_par_carton = $pu_initial + $frais_par_carton;
+    $valeur_recalculee = $pu_par_carton * $line->nb_carton;
+    
+    $total_valeur_recalculee += $valeur_recalculee;
     
     // Position de départ de la ligne
     $lineStartX = 15;
@@ -469,21 +472,21 @@ $totalStartY = $pdf->GetY();
 $totalStartX = 15;
 
 // Même logique pour MRO et devises étrangères (5 colonnes)
-$totalCellsWidth = $prodHeaderWidths[0] + $prodHeaderWidths[1] + $prodHeaderWidths[2] ;
-
 $pdf->SetXY($totalStartX, $totalStartY);
-$pdf->MultiCell($totalCellsWidth, 8, dol_html_entity_decode($langs->trans("Total"), ENT_QUOTES, 'UTF-8'), 1, 'R', 1);
+$pdf->MultiCell($prodHeaderWidths[0], 8, dol_html_entity_decode($langs->trans("Total"), ENT_QUOTES, 'UTF-8'), 1, 'L', 1);
+
+$pdf->SetXY($totalStartX + $prodHeaderWidths[0], $totalStartY);
+$pdf->MultiCell($prodHeaderWidths[1], 8, $total_cartons_all, 1, 'C', 1);
+
+$pdf->SetXY($totalStartX + $prodHeaderWidths[0] + $prodHeaderWidths[1], $totalStartY);
+$pdf->MultiCell($prodHeaderWidths[2] + $prodHeaderWidths[3], 8, '', 1, 'C', 1);
 
 if ($code_devise == 'MRO') {
     // Total en MRO
-    $pdf->SetXY($totalStartX + $totalCellsWidth , $totalStartY);
+    $pdf->SetXY($totalStartX + $prodHeaderWidths[0] + $prodHeaderWidths[1] + $prodHeaderWidths[2] + $prodHeaderWidths[3], $totalStartY);
     $pdf->MultiCell($prodHeaderWidths[4], 8, number_format($total_valeur_recalculee, 2, '.', '') . ' ' . $conf->currency, 1, 'R', 1);
 } else {
-    $pdf->SetXY($totalStartX + $totalCellsWidth, $totalStartY);
-$pdf->SetFont('dejavusans', 'I', 8); // Italique, taille réduite
-$pdf->MultiCell($prodHeaderWidths[3], 8, number_format($total_valeur_recalculee, 2, '.', '') . ' ' . $conf->currency, 1, 'R', 1);
-$pdf->SetFont('dejavusans', 'B', 10);  // Total en devise étrangère
-    $pdf->SetXY($totalStartX + $totalCellsWidth + $prodHeaderWidths[3], $totalStartY);
+    $pdf->SetXY($totalStartX + $prodHeaderWidths[0] + $prodHeaderWidths[1] + $prodHeaderWidths[2] + $prodHeaderWidths[3], $totalStartY);
     $pdf->MultiCell($prodHeaderWidths[4], 8, number_format($conversion_total_recalcule['converted'], 2, '.', '') . ' ' . $code_devise, 1, 'R', 1);
 }
 // Déplacer Y après la ligne de total

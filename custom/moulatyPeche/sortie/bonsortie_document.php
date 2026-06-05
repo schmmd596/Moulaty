@@ -83,6 +83,7 @@ while ($obj = $db->fetch_object($resProd)) {
     $linesProd[] = $obj;
     $total_poids_produits += $obj->total_poids;
     $total_valeur_produits += $obj->valeur;
+    $total_cartons_all += $obj->nb_carton;
 }
 
 // ============================================================================
@@ -255,12 +256,12 @@ for ($i = 0; $i < count($prodHeaderWidths); $i++) {
 }
 $pdf->Ln();
 
-// Calcul du supplément pour la répartition des frais
+// Calcul du supplément pour la répartition des frais par carton
 $nb_lignes = count($linesProd);
-$supplement = 0;
+$frais_par_carton = 0;
 
-if ($nb_lignes > 0) {
-    $supplement = ($total_montant_services + $total_facture) / $nb_lignes;
+if (isset($total_cartons_all) && $total_cartons_all > 0) {
+    $frais_par_carton = ($total_montant_services + $total_facture) / $total_cartons_all;
 }
 
 // Lignes des produits
@@ -275,7 +276,12 @@ foreach ($linesProd as $line) {
         $pdf->SetFillColor(255, 255, 255);
     }
     
-    $valeur_recalculee = $line->valeur + $supplement;
+    $pu_initial = ($line->nb_carton > 0) ? $line->valeur / $line->nb_carton : 0;
+    
+    // Calculer le PU par carton et la valeur totale
+    $pu_par_carton = $pu_initial + $frais_par_carton;
+    $valeur_recalculee = $pu_par_carton * $line->nb_carton;
+    
     $total_valeur_recalculee += $valeur_recalculee;
     
     // Produit
@@ -287,7 +293,7 @@ foreach ($linesProd as $line) {
     $pdf->Cell($prodHeaderWidths[0], 7, $productText, 1, 0, 'L', $fill);
     $pdf->Cell($prodHeaderWidths[1], 7, $line->nb_carton, 1, 0, 'C', $fill);
     $pdf->Cell($prodHeaderWidths[2], 7, price($line->poids_carton), 1, 0, 'R', $fill);
-    $pdf->Cell($prodHeaderWidths[3], 7, number_format($valeur_recalculee / $line->nb_carton, 2, '.', ' '), 1, 0, 'R', $fill);
+    $pdf->Cell($prodHeaderWidths[3], 7, number_format($pu_par_carton, 2, '.', ' '), 1, 0, 'R', $fill);
     $pdf->Cell($prodHeaderWidths[4], 7, number_format($valeur_recalculee, 2, '.', ' '), 1, 1, 'R', $fill);
     
     $fill = !$fill;
@@ -297,7 +303,9 @@ foreach ($linesProd as $line) {
 $pdf->SetFont('dejavusans', 'B', 10);
 $pdf->SetFillColor(67, 142, 204);
 $pdf->SetTextColor(255, 255, 255);
-$pdf->Cell($prodHeaderWidths[0] + $prodHeaderWidths[1] + $prodHeaderWidths[2] + $prodHeaderWidths[3], 8, dol_html_entity_decode($langs->trans("Total"), ENT_QUOTES, 'UTF-8'), 1, 0, 'R', 1);
+$pdf->Cell($prodHeaderWidths[0], 8, dol_html_entity_decode($langs->trans("Total"), ENT_QUOTES, 'UTF-8'), 1, 0, 'L', 1);
+$pdf->Cell($prodHeaderWidths[1], 8, $total_cartons_all, 1, 0, 'C', 1);
+$pdf->Cell($prodHeaderWidths[2] + $prodHeaderWidths[3], 8, '', 1, 0, 'C', 1);
 $pdf->Cell($prodHeaderWidths[4], 8, number_format($total_valeur_recalculee, 2, '.', ' '), 1, 1, 'R', 1);
 
 $pdf->Ln(12);

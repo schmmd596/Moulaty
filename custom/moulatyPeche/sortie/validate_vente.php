@@ -51,7 +51,8 @@ try {
             $sortie->fk_entrepot_source,
             -$objProd->poids_total,
             0,
-            'Vente client #'.$client_name.' - Sortie #'.$sortie->ref
+            'Vente client #'.$client_name.' - Sortie #'.$sortie->ref,
+            $product->pmp
         );
 
         // 4.2 Mise à jour des cartons liés (statut = 1 = sorti/vendu)
