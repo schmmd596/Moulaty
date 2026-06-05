@@ -1,0 +1,49 @@
+<?php
+// Fichier: htdocs/custom/note/langs/fr_FR/note.lang
+
+// Titres
+"Notes" = "Notes";
+"Note" = "Note";
+"AddNote" = "Ajouter une note";
+"EditNote" = "Modifier la note";
+"PrintNotes" = "Imprimer les notes";
+
+// Champs
+"Libelle" = "Libellé";
+"Description" = "Description";
+"Date" = "Date";
+"User" = "Utilisateur";
+"Actions" = "Actions";
+"Print" = "Imprimer";
+
+// Messages
+"RecordSaved" = "Enregistrement effectué";
+"RecordDeleted" = "Enregistrement supprimé";
+"RecordsDeleted" = "%s enregistrements supprimés";
+"ConfirmDelete" = "Êtes-vous sûr de vouloir supprimer ?";
+"ConfirmDeleteSelected" = "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?";
+"NoRecordsFound" = "Aucun enregistrement trouvé";
+"InvalidToken" = "Token de sécurité invalide";
+"NoLineSelected" = "Aucune ligne sélectionnée";
+
+// Options d'impression
+"SelectNotesToPrint" = "Sélectionner les notes à imprimer";
+"PrintOptions" = "Options d'impression";
+"PrintHeader" = "Imprimer l'en-tête";
+"PrintDate" = "Imprimer la date";
+"PrintUser" = "Imprimer l'utilisateur";
+"NewPagePerNote" = "Nouvelle page par note";
+"SelectNotes" = "Sélectionner les notes";
+"SelectAll" = "Tout sélectionner";
+"UnselectAll" = "Tout désélectionner";
+"GeneratePDF" = "Générer le PDF";
+"Cancel" = "Annuler";
+"Back" = "Retour";
+
+// Autres
+"WithSelectedLines" = "Avec les lignes sélectionnées";
+"DoNothing" = "Ne rien faire";
+"Delete" = "Supprimer";
+"Save" = "Enregistrer";
+"DateCreation" = "Date de création";
+"CreatedBy" = "Créé par";

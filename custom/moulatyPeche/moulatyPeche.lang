@@ -1,0 +1,589 @@
+Fiche Réception=بطاقة الاستلام
+Modifier Réception=تعديل الاستلام
+Nouvelle Réception=استلام جديد
+Informations principales=المعلومات الرئيسية
+Référence=المرجع
+Fournisseur=المورد
+Congélateur=المجمد
+Entrepôt=المستودع
+Date de création=تاريخ الإنشاء
+Commentaire=ملاحظات
+"Poids total (kg)"=الوزن الإجمالي (كجم)
+Montant total=المبلغ الإجمالي
+Produits Reçus=المنتجات المستلمة
+Produit=المنتج
+Mode=الطريقة
+Calibre=العيار
+Nb Voiture=عدد السيارات
+PU Voiture=سعر السيارة
+Poids Brut=الوزن الإجمالي
+PU Brut=سعر الوزن الإجمالي
+Poids Net=الوزن الصافي
+PU NET=سعر الوزن الصافي
+Total Ligne=المجموع
+Ajouter ligne=إضافة سطر
+Modifier=تعديل
+Créer=إنشاء
+Annuler=إلغاء
+Êtes-vous sûr de vouloir supprimer cette ligne ?=هل أنت متأكد من رغبتك في حذف هذا السطر؟
+Voiture=سيارة
+
+FicheReception=بطاقة الاستلام
+ModifierReception=تعديل الاستلام
+NouvelleReception=استلام جديد
+InformationsPrincipales=المعلومات الرئيسية
+Reference=المرجع
+Fournisseur=المورد
+Congelateur=المجمد
+Entrepot=المستودع
+DateCreation=تاريخ الإنشاء
+PoidsTotal=الوزن الإجمالي
+MontantTotal=المبلغ الإجمالي
+ProduitsRecus=المنتجات المستلمة
+Produit=المنتج
+Mode=الطريقة
+Calibre=العيار
+NbVoiture=عدد السيارات
+PUVoiture=سعر السيارة
+PoidsBrut=الوزن الإجمالي
+PUBrut=سعر الوزن الإجمالي
+PoidsNet=الوزن الصافي
+PUNET=سعر الوزن الصافي
+TotalLigne=المجموع
+AjouterLigne=إضافة سطر
+Creer=إنشاء
+
+DetailReception=تفاصيل الاستلام
+ReceptionNotFound=الاستلام غير موجود
+InformationsGenerales=المعلومات العامة
+DetailsLignesReception=تفاصيل خطوط الاستلام
+EnAttente=قيد الانتظار
+Valide=مُعتمد
+Annule=ملغى
+AucuneLigneReception=لا توجد أي سطر استلام
+ConfirmSuppressionReception=هل تريد تأكيد حذف هذا الاستلام؟
+ConfirmValidationReception=هل تريد اعتماد هذا الاستلام؟
+CreerFacture=إنشاء فاتورة
+VoirFacture=عرض الفاتورة
+CreerBonReception=إنشاء وصل الاستلام
+VoirBonReception=عرض وصل الاستلام
+PoidsNet=الوزن الصافي
+ReceptionAnnulee=تم إلغاء الاستلام
+RetourListe=العودة إلى القائمة
+FacturesLiees=الفواتير المرتبطة بهذا الاستلام
+ReferenceFacture=مرجع الفاتورة
+ReferenceFournisseur=مرجع المورد
+TotalHT=المجموع بدون ضريبة
+AucuneFactureLiee=لا توجد أي فاتورة مرتبطة بهذا الاستلام
+PrixVoiture=سعر السيارة
+PUPoidsNet=سعر الوحدة للوزن الصافي
+Etat=الحالة
+
+############################################
+# Module
+############################################
+ModuleDescription=وحدة إدارة الأسماك
+GestionPoissons=إدارة الأسماك
+
+############################################
+# Droits
+############################################
+RightLireModule=قراءة وحدة مولاتي صيد
+RightValiderReceptions=تأكيد الاستلامات والتجهيز والتغليف والخروج
+RightCreerBonFacture=إنشاء السندات والفواتير
+
+############################################
+# Menus principaux
+############################################
+MenuGestionPoissons=إدارة الأسماك
+MenuReception=الاستلام
+MenuMisenplat=التجهيز
+MenuCartonnage=التغليف
+MenuSortie=الخروج
+MenuRoles=الأدوار
+MenuUserEntrepot=مستخدم المخزن
+MenuUserBank=مستخدم البنك
+
+############################################
+# Réception
+############################################
+ReceptionTitreIcon=الاستلام
+NouvelleReception=استلام جديد
+ListeReceptions=قائمة الاستلامات
+FicheReception=بطاقة الاستلام
+ModifierReception=تعديل الاستلام
+InformationsPrincipales=المعلومات الرئيسية
+Reference=المرجع
+Fournisseur=المورد
+Congelateur=المجمد
+Entrepot=المستودع
+DateCreation=تاريخ الإنشاء
+Commentaire=ملاحظات
+PoidsTotal=الوزن الإجمالي
+MontantTotal=المبلغ الإجمالي
+ProduitsRecus=المنتجات المستلمة
+Produit=المنتج
+Mode=الطريقة
+Calibre=العيار
+NbVoiture=عدد السيارات
+PUVoiture=سعر السيارة
+PoidsBrut=الوزن الإجمالي
+PUBrut=سعر الوزن الإجمالي
+PoidsNet=الوزن الصافي
+PUNET=سعر الوزن الصافي
+TotalLigne=المجموع
+AjouterLigne=إضافة سطر
+Creer=إنشاء
+Annuler=إلغاء
+Modifier=تعديل
+ConfirmSuppressionLigne=هل أنت متأكد من رغبتك في حذف هذا السطر؟
+Voiture=سيارة
+
+############################################
+# Détail Réception
+############################################
+DetailReception=تفاصيل الاستلام
+ReceptionNotFound=الاستلام غير موجود
+InformationsGenerales=المعلومات العامة
+DetailsLignesReception=تفاصيل خطوط الاستلام
+EnAttente=في الانتظار
+Valide=مُعتمد
+Annule=ملغى
+AucuneLigneReception=لا توجد خطوط استلام
+ConfirmSuppressionReception=هل تريد حذف هذا الاستلام؟
+ConfirmValidationReception=هل تريد اعتماد هذا الاستلام؟
+CreerFacture=إنشاء فاتورة
+VoirFacture=عرض الفاتورة
+CreerBonReception=إنشاء سند استلام
+VoirBonReception=عرض سند الاستلام
+ReceptionAnnulee=تم إلغاء الاستلام
+RetourListe=العودة إلى القائمة
+FacturesLiees=الفواتير المرتبطة بهذا الاستلام
+ReferenceFacture=مرجع الفاتورة
+ReferenceFournisseur=مرجع المورد
+TotalHT=الإجمالي دون الضريبة
+AucuneFactureLiee=لا توجد فواتير مرتبطة
+PrixVoiture=سعر السيارة
+PUPoidsNet=سعر الوزن الصافي
+Etat=الحالة
+MenuUserBank=إدارة حسابات مستخدمي البنك
+MenuRoles=إدارة الأدوار
+MenuUsers=قائمة المستخدمين
+MenuPermissions=الصلاحيات
+MenuBanks=البنوك
+MenuOperations=العمليات البنكية
+MenuReports=التقارير والإحصائيات
+MenuSettings=الإعدادات
+MenuUserBankList=قائمة حسابات البنك
+MenuUserBankCreate=إنشاء حساب بنك
+MenuRolesList=قائمة الأدوار
+MenuRolesCreate=إنشاء دور جديد
+MenuUserProfiles=ملفات المستخدمين
+MenuLogs=سجلات النظام
+
+MenuReception=الاستلامات
+MenuReceptionNew=استلام جديد
+MenuReceptionList=قائمة الاستلامات
+
+MenuMisenplat=وضع الأطباق
+MenuMisenplatNew=وضع طبق جديد
+MenuMisenplatList=قائمة وضع الأطباق
+
+MenuCartonnage=التغليف / التجميد
+MenuCartonnageNew=التغليف جديد
+MenuCartonnageList=قائمة التغليف المجمدة
+
+MenuSortie=الخروج
+MenuSortieEntrepot=خروج الي المستودع
+MenuSortieClient=خروج للعميل
+MenuSortieList=قائمة الخروج
+
+MenuRoles=الأدوار والمستخدمين
+MenuUserEntrepot=مستخدمي المستودع
+MenuUserBank=مستخدمي البنك
+
+LignesPage= عدد الاسطر
+Details=التفاصيل
+VoirDetails=عرض التفاصيل
+AucunResultat=لا توجد نتائج
+AucuneReceptionTrouvee=لا يوجد أي استلام مطابق لمعايير البحث الحالية
+Brouillon=مسودة
+Utilisateur=المستخدم
+DateDebut=تاريخ البداية
+DateFin=تاريخ النهاية
+BonsMiseEnPlat=قائمة أوامر وضع الأطباق
+ListeLots=قائمة الدُفعات
+ReferenceLot=مرجع الدفعة
+RechercherReference=البحث عن المرجع
+Rechercher=بحث
+// Traductions pour les bons de sortie
+ListeBonsSortie=قائمة أوامر الخروج
+TransfertInterne=نقل داخلي
+Vente=بيع
+EntrepotSource=المستودع المصدر
+ClientDestination=العميل / الوجهة
+Cartons=الكراتين
+Frais=الرسوم
+Brouillon=مسودة
+Transfere=تم التحويل
+AucunBonSortieTrouve=لم يتم العثور على أي أمر خروج وفقًا لمعايير البحث الحالية
+Precedent=السابق
+Suivant=التالي
+
+// Traductions réutilisées du fichier global
+Reference=المرجع
+Type=النوع
+DateDebut=تاريخ البداية
+DateFin=تاريخ النهاية
+LignesPage=عدد الأسطر/الصفحة
+RechercherReference=البحث عن المرجع
+Tous=الكل
+Rechercher=بحث
+DateCreation=تاريخ الإنشاء
+Poids=الوزن
+Statut=الحالة
+Actions=الإجراءات
+VoirDetails=عرض التفاصيل
+AucunResultat=لا توجد نتائج
+Valide=تم التحقق
+Inconnu=غير معروف
+
+// Traductions pour le détail des bons de mise en plat
+DetailsBonMiseEnPlat=تفاصيل أمر التحضير
+BonMiseEnPlat=أمر التحضير
+IdentifiantBonManquant=معرّف الأمر مفقود.
+BonMiseEnPlatIntrouvable=أمر التحضير غير موجود.
+InformationsGenerales=معلومات عامة
+ProduitsMisenPlat=المنتجات المحضرة
+AucuneLigneEnregistree=لا توجد أسطر مسجلة.
+EnAttente=قيد الانتظار
+Annule=ملغي
+NombrePlats=عدد الأطباق
+PlatsCartonnes=أطباق معبأة
+PoidsPlat=الوزن / الطبق
+PoidsTotal=الوزن الإجمالي
+TotalPlats=إجمالي الأطباق
+FraisTotaux=الإجمالي الرسوم
+ConfirmerSuppression=تأكيد الحذف؟
+VoirBon=عرض الأمر
+VoirFacture=عرض الفاتورة
+ImpossibleAjouterFrais=لا يمكن إضافة رسوم لأن بعض الأطباق قد تم إخراجها بالفعل.
+AjouterFrais=إضافة رسوم
+BonTermine=الأمر مكتمل — لا يمكن القيام بأي إجراء
+
+// Traductions réutilisées
+Reference=المرجع
+Entrepot=المستودع
+Utilisateur=المستخدم
+DateCreation=تاريخ الإنشاء
+Frais=الرسوم
+Statut=الحالة
+Commentaire=تعليق
+Produit=المنتج
+Total=الإجمالي
+Modifier=تعديل
+Supprimer=حذف
+Valider=اعتماد
+RetourListe=العودة إلى القائمة
+Valide=تم الاعتماد
+// Traductions pour le détail des lots
+DetailsLot=تفاصيل الدفعة
+LotNonSpecifie=لم يتم تحديد الدفعة.
+LotIntrouvable=الدفعة غير موجودة.
+Lot=دفعة
+InformationsLot=معلومات الدفعة
+CreePar=تم الإنشاء بواسطة
+NonSpecifie=—
+DetailLot=تفاصيل الدفعة
+AucuneLigneLot=لا توجد أسطر في هذه الدفعة.
+NbCartons=عدد الكراتين
+CartonsSortis=الكراتين المستخرجة
+PoidsCarton=الوزن / الكرتونة
+PlatsCarton=الأطباق / الكرتونة
+TotalCartons=إجمالي الكراتين
+FacturesLieesLot=الفواتير المرتبطة بهذه الدفعة
+ReferenceDolibarr=مرجع دوليبّار
+ReferenceFournisseur=مرجع المورد
+VoirBonActuel=عرض الأمر الحالي
+CreerBonEntree=إنشاء أمر إدخال
+ConfirmerSuppressionLot=تأكيد حذف الدفعة؟
+ConfirmerValidationLot=تأكيد الاعتماد؟ سيتم تحديث مخزون الكراتين.
+AucuneFactureLiee=لا توجد فواتير مرتبطة بهذه الدفعة.
+// Traductions pour le détail des sorties
+DetailsBonSortie=تفاصيل أمر الصرف - 
+IDManquant=المعرف مفقود
+BonSortieIntrouvable=أمر الصرف غير موجود
+BonSortie=أمر الصرف
+TransfertInterne=نقل داخلي
+VenteClient=بيع للعميل
+EntrepotSource=المستودع المصدر
+EntrepotDestination=المستودع الوجهة
+ProduitsSortis=المنتجات المستخرجة
+ValeurTotale=القيمة الإجمالية
+ValiderSortieInterne=اعتماد الصرف الداخلي
+VoirBonSortie=عرض أمر الصرف
+CreerBonSortie=إنشاء أمر الصرف
+TransfererEntrepot=نقل إلى المستودع
+FacturerClient=الفوترة للعميل
+ConfirmerTransfert=هل أنت متأكد من رغبتك في نقل هذا الصرف إلى المستودع؟
+ImpossibleTransferer=لا يمكن النقل: يجب اعتماد الصرف، وإنشاء الأمر والفاتورة.
+FacturesLieesSortie=الفواتير المرتبطة بهذا الصرف
+FactureClientAssociee=فاتورة العميل المرتبطة
+AucuneFactureClient=لم يتم العثور على أي فاتورة للعميل.
+DateFacture=تاريخ الفاتورة
+TotalTTC=الإجمالي شامل الضريبة
+Transfere=تم النقل
+
+NbCartonsTotal=إجمالي الكراتين
+PreparationMiseEnPlat=تحضير وضعية الإعداد
+ProduitsDisponibles=المنتجات المتاحة للإعداد
+Selection=اختيار
+QuantiteTotale=الكمية الإجمالية
+DejaPlate=تم إعدادها بالفعل
+ResteAPlater=متبقي للإعداد
+LancerMiseEnPlat=بدء وضعية الإعداد
+EnReception=قيد الاستلام
+Termine=مكتمل
+EnTraitement=قيد المعالجة
+AucunProduitDisponible=لا توجد منتجات متاحة
+TousLesProduitsTraites=تم معالجة جميع المنتجات بالفعل أو قيد المعالجة.
+AucuneReceptionTrouvee=لم يتم العثور على استلام
+AucuneReceptionFiltre=لا يوجد استلام يطابق معايير التصفية المحددة.
+Filtres=مرشحات
+Filtrer= بحث
+Reception=الاستلام
+MisesEnPlatAttenteSortie=أطباق_في_انتظار_الخروج
+CritèresFiltrage=معايير_التصفية
+Reinitialiser=إعادة_التهيئة
+MisesEnPlatDisponibles=الأطباق_المتوفرة
+CreerSortieTunnel=إنشاء_خروج_النفق
+NbPlats=عدد_الأطباق
+NouvelleSortie=خروج_جديد
+
+InformationsSortie=معلومات_الخروج
+
+ConfigurationSortie=إعداد_الخروج
+
+EntrepotSource=المستودع_المصدر
+
+ModeSortie=وضع_الخروج
+
+TransfertInterne=نقل_داخلي
+
+EntrepotDestination=المستودع_الوجهة
+
+ConfirmerSelection=تأكيد_الاختيار
+
+ProduitsTransférer=المنتجات_المراد_نقلها
+
+NbCartons=عدد_الكراتين
+
+StockDisponible=المخزون_المتاح
+
+AjouterProduit=إضافة_منتج
+
+ValiderSortie=تأكيد_الخروج
+
+VeuillezSelectionnerProduit=يرجى_اختيار_منتج
+
+ModificationBonSortie=تعديل_إذن_الخروج
+
+ConfirmationBonSortie=تأكيد_إذن_الخروج
+
+SortieNonModifiable=الخروج_غير_قابل_للتعديل
+
+ErreurEntrepotsIdentiques=خطأ:_المستودعات_متطابقة
+
+InformationsGenerales=معلومات_عامة
+
+DetailsSortie=تفاصيل_الخروج
+
+EntrepotSource=المستودع_المصدر
+
+EntrepotDestination=المستودع_الوجهة
+
+Client=العميل
+
+TypeSortie=نوع_الخروج
+
+TransfertEntrepots=نقل_المستودعات
+
+SortieClient=خروج_للعميل
+AucunProduitSelectionne=لم_يتم_اختيار_أي_منتج
+
+MettreAJourSortie=تحديث_الخروج
+
+ConfirmerSortie=تأكيد_الخروج
+
+VeuillezSelectionnerProduit=يرجى_اختيار_منتج
+
+QuantitesInvalides=كميات_غير_صالحة
+
+ConfirmerMiseAJour=تأكيد_التحديث
+
+ConfirmerCreation=تأكيد_الإنشاء
+FacturationSortie=فَوْتُورَة الخروج
+
+InformationsSortie=معلومات الخروج
+
+Reference=المرجع
+
+Fournisseur=المورد
+
+Utilisateur=المستخدم
+
+Commentaire=تعليق
+
+NbCartons=عدد الكراتين
+
+PoidsTotal=الوزن الإجمالي
+
+Services=الخدمات
+
+Service=الخدمة
+
+QuantiteKg=الكمية بالكيلوغرام
+
+PrixUnitaire=السعر الوحدوي
+
+Actions=الإجراءات
+
+ServiceStockage=خدمة التخزين
+
+ServiceStockageIntrouvable=خدمة التخزين غير موجودة
+
+AjouterService=إضافة خدمة
+
+TotalGeneral=الإجمالي العام
+
+CreerFacture=إنشاء فاتورة
+
+IdentifiantSortieInvalide=معرّف الخروج غير صالح
+
+SortieIntrouvable=الخروج غير موجود
+
+ErreurRecuperationFournisseur=خطأ في استرجاع المورد
+
+AucunFournisseurTrouve=لم يتم العثور على أي مورد
+
+MinimumUneLigneRequired=مطلوب على الأقل سطر واحد
+
+SelectionnerService=اختر خدمة
+
+TotalDoitEtrePositif=يجب أن يكون الإجمالي موجبًا
+
+ConfirmerCreationFacture=تأكيد إنشاء الفاتورة
+
+DetailsBonSortie=تفاصيل إذن الخروج
+
+BonSortie=إذن الخروج
+
+TransfertInterne=نقل داخلي
+
+Vente=بيع
+
+EntrepotDestination=المستودع الوجهة
+
+Client=العميل
+
+PoidsTotal=الوزن الإجمالي
+
+NbCartons=عدد الكراتين
+
+TotalFrais=إجمالي الرسوم
+
+ProduitsSortie=منتجات الخروج
+
+ValeurTotale=القيمة الإجمالية
+
+TotalProduits=إجمالي المنتجات
+
+AucunProduitSortie=لا يوجد أي منتج للخروج
+
+AjouterServicesManuels=إضافة خدمات يدوية
+
+TotalServices=إجمالي الخدمات
+
+TotalSortieProduitsServices=إجمالي الخروج (منتجات + خدمات)
+
+ValiderBonSortie=تأكيد إذن الخروج
+
+AucunIdentifiantSortie=لا يوجد معرّف خروج
+
+AccesReserveAdmin=الوصول مخصص للمدير فقط
+
+BonSortieIntrouvable=إذن الخروج غير موجود
+
+ConfirmerValidationBonSortie=تأكيد التحقق من إذن الخروج
+
+CreationBonEntree=إنشاء إذن الدخول
+
+CreationBonEntreeStock=إنشاء إذن دخول للمخزون
+
+InformationsBonEntree=معلومات إذن الدخول
+
+ConfigurationEntree=إعدادات الدخول
+
+PoidsTotalLot=الوزن الإجمالي للدفعة
+
+MontantTotalServices=إجمالي مبلغ الخدمات
+
+ProduitsIssusLot=المنتجات الناتجة عن اللوت
+
+ProduitsConsommes=المنتجات المستهلكة
+
+AjouterServicesManuels=إضافة خدمات يدوية
+
+CreerBonEntree=إنشاء إذن الدخول
+
+AccesReserveAdmin=الوصول مخصص للمدير فقط
+
+BonEntreeExisteDeja=إذن الدخول موجود مسبقًا
+
+ConfirmerCreationBonEntree=تأكيد إنشاء إذن الدخول
+
+PoidsCartonKg=وزن الكرتون (كغ)
+
+PoidsTotalKg=الوزن الإجمالي (كغ)
+
+CreationBonReception=إنشاء إذن الاستلام
+
+BonReceptionReception=إذن الاستلام
+
+InformationsReception=معلومات الاستلام
+
+DetailsReception=تفاصيل الاستلام
+
+ReferenceReception=مرجع الاستلام
+
+Congelateur=المجمّد
+
+LignesReception=أسطر الاستلام
+
+DescriptionProduit=وصف المنتج
+
+QuantitePoids=الكمية / الوزن
+
+PrixPU=السعر الوحدوي
+
+TotalLigne=إجمالي السطر
+
+AjouterLigne=إضافة سطر
+
+MontantTotal=الإجمالي الكلي
+
+LignesManuelles=أسطر يدوية
+
+AjouterLigneManuelle=إضافة سطر يدوي
+
+CreerBonReception=إنشاء إذن الاستلام
+
+Voiture=السيارة
+
+PoidsBrut=الوزن الإجمالي (الخام)
+
+PoidsNet=الوزن الصافي
+
+ChoisirService=اختيار خدمة
+
+ConfirmerCreationBonReception=تأكيد إنشاء إذن الاستلام

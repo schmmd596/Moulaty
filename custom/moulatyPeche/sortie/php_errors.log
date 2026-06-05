@@ -1,0 +1,14 @@
+[01-Jan-2026 16:53:17 Europe/Paris] PHP Warning:  session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in /home/zemo2264/public_html/main.inc.php on line 135
+[01-Jan-2026 16:53:17 Europe/Paris] PHP Warning:  session_name(): Session name cannot be changed when a session is active in /home/zemo2264/public_html/main.inc.php on line 137
+[01-Jan-2026 16:53:17 Europe/Paris] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on bool in /home/zemo2264/public_html/core/db/mysqli.class.php:413
+Stack trace:
+#0 /home/zemo2264/public_html/custom/moulatyPeche/sortie/facture_vente.php(49): DoliDBMysqli->fetch_object()
+#1 {main}
+  thrown in /home/zemo2264/public_html/core/db/mysqli.class.php on line 413
+[01-Jan-2026 16:54:25 Europe/Paris] PHP Warning:  session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in /home/zemo2264/public_html/main.inc.php on line 135
+[01-Jan-2026 16:54:25 Europe/Paris] PHP Warning:  session_name(): Session name cannot be changed when a session is active in /home/zemo2264/public_html/main.inc.php on line 137
+[01-Jan-2026 16:54:25 Europe/Paris] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on bool in /home/zemo2264/public_html/core/db/mysqli.class.php:413
+Stack trace:
+#0 /home/zemo2264/public_html/custom/moulatyPeche/sortie/facture_vente.php(53): DoliDBMysqli->fetch_object()
+#1 {main}
+  thrown in /home/zemo2264/public_html/core/db/mysqli.class.php on line 413

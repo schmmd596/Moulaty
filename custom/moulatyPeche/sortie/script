@@ -1,0 +1,132 @@
+
+<script>
+// ============================================================================
+// 🔹 Variables et fonctions JavaScript
+// ============================================================================
+var selectProduitHTML = <?php
+echo json_encode(
+    str_replace("\n", '', $form->selectarray('products[]', array('' => '') + $produits, '', 0, 0, 0, '', 0, 0, 0, '', 'minwidth200 product-select'))
+);
+?>;
+
+/**
+ * Ajoute une nouvelle ligne de produit
+ */
+function addRow() {
+    var table = document.getElementById('tableProduits').getElementsByTagName('tbody')[0];
+    var row = table.insertRow(-1);
+    
+    // Cellule Produit
+    var cellProduit = row.insertCell(0);
+    cellProduit.innerHTML = selectProduitHTML;
+    
+    // Cellule Nombre de cartons
+    var cellCartons = row.insertCell(1);
+    cellCartons.className = 'center';
+    cellCartons.innerHTML = '<input type="number" name="nb_carton[]" value="0" step="1" min="0" class="carton-input filter-input" onchange="updateRow(this)">';
+    
+    // Cellule Poids
+    var cellPoids = row.insertCell(2);
+    cellPoids.className = 'center';
+    cellPoids.innerHTML = '<input type="number" name="poids[]" value="0" step="0.01" min="0" readonly class="poids-input filter-input">';
+    
+    // Cellule Stock disponible
+    var cellStock = row.insertCell(3);
+    cellStock.innerHTML = '<input type="text" name="stock_dispo[]" value="" readonly class="stock-info filter-input">';
+    
+    // Cellule Actions
+    var cellActions = row.insertCell(4);
+    cellActions.className = 'center';
+    cellActions.innerHTML = '<input type="hidden" name="cartons_rowid[]" value=""><button type="button" class="remove-btn" onclick="removeRow(this)"><i class="fa fa-trash"></i> <?php echo $langs->trans("Supprimer"); ?></button>';
+    
+    // Attacher les événements
+    const select = cellProduit.querySelector('.product-select');
+    select.addEventListener('change', function() {
+        updateStockDisponibilite(this);
+    });
+}
+
+/**
+ * Supprime une ligne de produit
+ */
+function removeRow(btn) {
+    var row = btn.closest('tr');
+    row.parentNode.removeChild(row);
+}
+
+/**
+ * Met à jour les informations de la ligne
+ */
+function updateRow(element) {
+    var row = element.closest('tr');
+    var nbCarton = row.querySelector('input[name="nb_carton[]"]');
+    var poids = row.querySelector('input[name="poids[]"]');
+    var fk_entrepot = <?php echo $fk_entrepot_source ?: 0; ?>;
+    var productId = row.querySelector('select[name="products[]"]').value;
+    
+    if(productId <= 0) return;
+
+    var inputRowid = row.querySelector('input[name="cartons_rowid[]"]');
+    var params = 'product_id=' + productId + '&fk_entrepot=' + fk_entrepot + '&mode=carton&nb_carton=' + nbCarton.value;
+    
+    fetch('ajax2.php?' + params)
+    .then(response => response.json())
+    .then(data => {
+        if(data.nb_carton_calc !== undefined) nbCarton.value = data.nb_carton_calc;
+        if(data.poids_calc !== undefined) poids.value = data.poids_calc;
+        if(data.cartons_rowid !== undefined && inputRowid) {
+            inputRowid.value = data.cartons_rowid.join(',');
+        }
+    })
+    .catch(error => console.error('Erreur:', error));
+}
+
+/**
+ * Met à jour le stock disponible
+ */
+function updateStockDisponibilite(selectElement) {
+    var productId = selectElement.value;
+    var fk_entrepot = <?php echo (int) $fk_entrepot_source; ?>;
+    var row = selectElement.closest('tr');
+    
+    if (!row) return;
+
+    if (productId > 0) {
+        fetch('ajax.php?product_id=' + productId + '&fk_entrepot=' + fk_entrepot)
+            .then(response => response.json())
+            .then(data => {
+                var stockInput = row.querySelector('input[name="stock_dispo[]"]');
+                if (stockInput && data.nb_carton_dispo !== undefined && data.poids_dispo !== undefined) {
+                    stockInput.value = data.nb_carton_dispo + ' <?php echo $langs->trans("cartons"); ?> / ' + data.poids_dispo + ' kg';
+                }
+            })
+            .catch(err => console.error('Erreur AJAX:', err));
+    } else {
+        var stockInput = row.querySelector('input[name="stock_dispo[]"]');
+        if (stockInput) stockInput.value = '';
+    }
+}
+
+// Empêcher l'envoi du formulaire si aucun produit n'est sélectionné
+document.getElementById('formSortie').addEventListener('submit', function(e) {
+    const produits = document.querySelectorAll('select[name="products[]"]');
+    let hasProduct = false;
+    
+    produits.forEach(select => {
+        if (select.value > 0) hasProduct = true;
+    });
+    
+    if (!hasProduct && produits.length > 0) {
+        alert("<?php echo $langs->trans('VeuillezSelectionnerProduit'); ?>");
+        e.preventDefault();
+    }
+});
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter une ligne initiale si on est dans la section produits
+    <?php if (!empty($fk_entrepot_source) && isset($mode_sortie) && $mode_sortie==='1' && !empty($fk_client_dest)): ?>
+    addRow();
+    <?php endif; ?>
+});
+</script>

@@ -1,0 +1,301 @@
+/* =====================
+   STYLES RÉCEPTION
+===================== */
+
+.reception-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.reception-header {
+    background: linear-gradient(135deg, #d4daf7 0%, #dabff5 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.reception-form {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.section-title {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+.titlefieldcreate {
+    font-weight: 600;
+    color: #2c3e50;
+    width: 30%;
+    padding: 12px 15px;
+    background: #e8f4fd;
+    border-right: 3px solid #3498db;
+}
+
+.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.form-table td {
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+.form-table tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.form-input {
+    width: 90%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
+}
+
+.form-input[readonly] {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.custom-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%236c757d' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+}
+
+.custom-select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
+}
+/* =====================
+   STYLES COLONNES TABLEAU PRODUITS
+===================== */
+
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(47, 142, 250, 0.1);
+}
+
+.products-table th {
+    background: #abd2f8;
+    color: rgb(0, 0, 0);
+    padding: 15px 12px;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    font-size: 14px;
+}
+
+.products-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.products-table tr:hover {
+    background: #f8f9fa;
+}
+
+/* Largeurs des colonnes avec espacement équilibré */
+.col-product { 
+    width: 180px; 
+    padding-left: 15px;
+    padding-right: 10px;
+}
+
+.col-mode { 
+    width: 140px; 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.col-caliber { 
+    width: 100px; 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.col-vehicle { 
+    width: 100px; 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.col-price { 
+    width: 110px; 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.col-weight { 
+    width: 110px; 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.col-total { 
+    width: 120px; 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.col-actions { 
+    width: 70px; 
+    padding-left: 10px;
+    padding-right: 15px;
+}
+
+/* Alignement spécifique */
+.col-product,
+.col-mode,
+.col-caliber {
+    text-align: left;
+}
+
+.col-vehicle,
+.col-price,
+.col-weight,
+.col-total {
+    text-align: center;
+}
+
+.col-actions {
+    text-align: center;
+}
+
+/* Inputs dans les cellules avec espacement */
+.products-table .form-input {
+    width: 100%;
+    min-width: 50px;
+    padding: 6px 8px;
+    margin: 0;
+    text-align: center;
+}
+
+.products-table .col-product .form-input,
+.products-table .col-mode .form-input,
+.products-table .col-caliber .form-input {
+    text-align: left;
+}
+
+.products-table .custom-select {
+    width: 100%;
+    min-width: 80px;
+    padding: 6px 8px;
+    margin: 0;
+}
+
+/* Boutons dans les actions */
+.products-table .butActionDelete {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 12px;
+}
+
+/* Style pour les totaux */
+.products-table .total-line {
+    font-weight: 600;
+    color: #27ae60;
+    font-size: 14px;
+    text-align: right;
+    padding-right: 8px;
+}
+
+/* Responsive pour petits écrans */
+@media (max-width: 1200px) {
+    .products-table {
+        font-size: 13px;
+    }
+    
+    .products-table th {
+        padding: 12px 8px;
+    }
+    
+    .products-table td {
+        padding: 10px 6px;
+    }
+    
+    .col-product { width: 160px; }
+    .col-mode { width: 130px; }
+    .col-caliber { width: 90px; }
+    .col-vehicle { width: 90px; }
+    .col-price { width: 100px; }
+    .col-weight { width: 100px; }
+    .col-total { width: 110px; }
+    .col-actions { width: 60px; }
+}
+
+@media (max-width: 768px) {
+    .products-table-container {
+        overflow-x: auto;
+    }
+    
+    .products-table {
+        min-width: 900px;
+        font-size: 12px;
+    }
+    
+    .products-table th,
+    .products-table td {
+        padding: 8px 4px;
+    }
+    
+    .products-table .form-input {
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+    
+    .products-table .custom-select {
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+}
