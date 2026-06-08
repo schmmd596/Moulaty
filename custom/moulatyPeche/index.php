@@ -43,7 +43,7 @@ if ($resqlp) {
 // ====================
 // 🔹 FILTRES
 // ====================
-$fk_entrepot = GETPOST('fk_entrepot', 'int');
+$fk_entrepot = GETPOST('fk_entrepot', 'array');
 $fk_product  = GETPOST('fk_product', 'int');
 
 // ====================
@@ -57,6 +57,15 @@ if ($res_ent && $db->num_rows($res_ent) > 0) {
         $entrepots_accessibles[] = (int)$obj_ent->fk_entrepot;
     }
 }
+
+// Checkboxes par défaut : si le formulaire n'a pas été soumis, on coche tous les entrepôts accessibles.
+if (!isset($_GET['fk_entrepot'])) {
+    $fk_entrepot = $entrepots_accessibles;
+}
+if (!is_array($fk_entrepot)) $fk_entrepot = [];
+$fk_entrepot_clean = array_map('intval', $fk_entrepot);
+
+
 
 // ====================
 // 🔹 HEADER
@@ -213,14 +222,26 @@ print load_fiche_titre($langs->trans('GlobalDashboard'), '', 'title_generic');
 // ====================
 print '<div class="filter-card">';
 print '<form method="GET" action="">';
-print '<label style="font-weight:600; color:#333; margin-right:10px;">'.$langs->trans('Warehouse').' :</label> '
-    .$form->selectarray('fk_entrepot', $entrepots, $fk_entrepot, 0);
+print '<div style="margin-bottom:15px;">';
+print '<label style="font-weight:600; color:#333; margin-right:15px; display:block; margin-bottom:8px;">'.$langs->trans('Warehouse').' :</label>';
+print '<div style="display:flex; flex-wrap:wrap; gap:15px;">';
+foreach ($entrepots as $id_ent => $label_ent) {
+    if ($id_ent > 0) {
+        $checked = (in_array($id_ent, $fk_entrepot_clean)) ? 'checked' : '';
+        print '<label style="cursor:pointer; font-size:14px; display:flex; align-items:center; gap:5px;"><input type="checkbox" name="fk_entrepot[]" value="'.$id_ent.'" '.$checked.'> '.dol_escape_htmltag($label_ent).'</label>';
+    }
+}
+print '</div>';
+print '</div>';
 
 print '&nbsp;&nbsp;&nbsp;';
 
 print '<label style="font-weight:600; color:#333; margin-right:10px;">'.$langs->trans('Product').' :</label> '
     .$form->selectarray('fk_product', $produits, $fk_product, 0);
 print ' <input type="submit" class="butAction" value="'.$langs->trans('Show').'">';
+print '<input type="hidden" name="idmenu" value="'.GETPOST('idmenu', 'int').'">';
+print '<input type="hidden" name="mainmenu" value="'.GETPOST('mainmenu', 'alpha').'">';
+print '<input type="hidden" name="leftmenu" value="'.GETPOST('leftmenu', 'alpha').'">';
 print '</form>';
 print '</div>';
 
@@ -237,9 +258,9 @@ $sql = "SELECT COUNT(r.rowid) AS nb_receptions,
         FROM ".MAIN_DB_PREFIX."pech_reception r
         LEFT JOIN ".MAIN_DB_PREFIX."entrepot e ON e.rowid = r.fk_entrepot
         WHERE r.etat = 1";
-if ($fk_entrepot > 0) $sql .= " AND r.fk_entrepot = ".$fk_entrepot;
-
-if (!empty($entrepots_accessibles)) {
+if (!empty($fk_entrepot_clean)) {
+    $sql .= " AND r.fk_entrepot IN (".implode(',', $fk_entrepot_clean).")";
+} else if (!empty($entrepots_accessibles)) {
     $sql .= " AND r.fk_entrepot IN (".implode(',', $entrepots_accessibles).")";
 }
 
@@ -264,8 +285,9 @@ $sql2 = "SELECT e.ref AS entrepot, COUNT(r.rowid) AS nb_receptions,
          FROM ".MAIN_DB_PREFIX."pech_reception r
          LEFT JOIN ".MAIN_DB_PREFIX."entrepot e ON e.rowid = r.fk_entrepot
          WHERE r.etat = 1";
-if ($fk_entrepot > 0) $sql2 .= " AND r.fk_entrepot = ".$fk_entrepot;
-if (!empty($entrepots_accessibles)) {
+if (!empty($fk_entrepot_clean)) {
+    $sql2 .= " AND r.fk_entrepot IN (".implode(',', $fk_entrepot_clean).")";
+} else if (!empty($entrepots_accessibles)) {
     $sql2 .= " AND r.fk_entrepot IN (".implode(',', $entrepots_accessibles).")";
 }
 $sql2 .= " GROUP BY e.ref ORDER BY e.ref ASC";
@@ -300,9 +322,12 @@ print '<hr class="styled">';
 print '<div class="section-title">'.$langs->trans('DishTracking').'</div>';
 
 $where = [];
-if ($fk_entrepot > 0) $where[] = "b.fk_entrepot = ".(int)$fk_entrepot;
+if (!empty($fk_entrepot_clean)) {
+    $where[] = "b.fk_entrepot IN (".implode(',', $fk_entrepot_clean).")";
+} else if (!empty($entrepots_accessibles)) {
+    $where[] = "b.fk_entrepot IN (".implode(',', $entrepots_accessibles).")";
+}
 if ($fk_product > 0) $where[] = "m.fk_product = ".(int)$fk_product;
-if (!empty($entrepots_accessibles)) $where[] = "b.fk_entrepot IN (".implode(',', $entrepots_accessibles).")";
 
 $sql = "
 SELECT 
@@ -364,9 +389,12 @@ print '<hr class="styled">';
 print '<div class="section-title">'.$langs->trans('CartonTracking').'</div>';
 
 $where = [];
-if ($fk_entrepot > 0) $where[] = "l.fk_entrepot = ".(int)$fk_entrepot;
+if (!empty($fk_entrepot_clean)) {
+    $where[] = "l.fk_entrepot IN (".implode(',', $fk_entrepot_clean).")";
+} else if (!empty($entrepots_accessibles)) {
+    $where[] = "l.fk_entrepot IN (".implode(',', $entrepots_accessibles).")";
+}
 if ($fk_product > 0) $where[] = "c.fk_product = ".(int)$fk_product;
-if (!empty($entrepots_accessibles)) $where[] = "l.fk_entrepot IN (".implode(',', $entrepots_accessibles).")";
 
 $sql = "
 SELECT 
@@ -442,7 +470,11 @@ LEFT JOIN ".MAIN_DB_PREFIX."facture f ON f.rowid = s.fk_facture_client
 WHERE s.statut = 2
 ";
 
-if ($fk_entrepot > 0) $sql .= " AND s.fk_entrepot_source = ".((int)$fk_entrepot);
+if (!empty($fk_entrepot_clean)) {
+    $sql .= " AND s.fk_entrepot_source IN (".implode(',', $fk_entrepot_clean).")";
+} else if (!empty($entrepots_accessibles)) {
+    $sql .= " AND s.fk_entrepot_source IN (".implode(',', $entrepots_accessibles).")";
+}
 
 $sql .= " GROUP BY e.rowid, e.ref ORDER BY e.ref ASC";
 

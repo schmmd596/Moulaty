@@ -25,7 +25,11 @@ if ($action === 'confirm_sortie' || $action === 'update_sortie') {
         $fk_client          = GETPOST('fk_client', 'int');
         $commentaire        = GETPOST('commentaire', 'restricthtml');
 
-        if (empty($fk_entrepot_source)) {
+        $is_regroupement    = GETPOST('is_regroupement', 'int');
+        $date_creation      = GETPOST('date_creation', 'none');
+        $row_entrepots      = GETPOST('row_entrepots', 'array');
+
+        if (empty($fk_entrepot_source) && !$is_regroupement) {
             throw new Exception("Entrepôt source manquant.");
         }
 
@@ -53,16 +57,17 @@ if ($action === 'confirm_sortie' || $action === 'update_sortie') {
             $ref = $ref1;
 
             $sql = "INSERT INTO ".MAIN_DB_PREFIX."pech_sortie
-                    (ref,type,fk_entrepot_source,fk_entrepot_dest,fk_client,fk_user,commentaire,statut,poids_total,nb_carton_total,entity)
+                    (ref,type,fk_entrepot_source,fk_entrepot_dest,fk_client,fk_user,commentaire,statut,poids_total,nb_carton_total,entity,date_creation)
                     VALUES (
                         '".$db->escape($ref)."',
                         ".(int)$type_sortie.",
-                        ".(int)$fk_entrepot_source.",
+                        ".($is_regroupement ? "NULL" : (int)$fk_entrepot_source).",
                         ".(!empty($fk_entrepot_dest)?(int)$fk_entrepot_dest:"NULL").",
                         ".(!empty($fk_client)?(int)$fk_client:"NULL").",
                         ".(int)$user->id.",
                         ".(!empty($commentaire)?"'".$db->escape($commentaire)."'":"NULL").",
-                        0,0,0,".(int)$conf->entity."
+                        0,0,0,".(int)$conf->entity.",
+                        ".(!empty($date_creation) ? "'".$db->escape($date_creation)."'" : "NOW()")."
                     )";
             if (!$db->query($sql)) throw new Exception("Erreur insertion sortie : ".$db->lasterror());
 
@@ -77,10 +82,11 @@ if ($action === 'confirm_sortie' || $action === 'update_sortie') {
 
             $sql = "UPDATE ".MAIN_DB_PREFIX."pech_sortie SET
                         type = ".(int)$type_sortie.",
-                        fk_entrepot_source = ".(int)$fk_entrepot_source.",
+                        fk_entrepot_source = ".($is_regroupement ? "NULL" : (int)$fk_entrepot_source).",
                         fk_entrepot_dest = ".(!empty($fk_entrepot_dest)?(int)$fk_entrepot_dest:"NULL").",
                         fk_client = ".(!empty($fk_client)?(int)$fk_client:"NULL").",
-                        commentaire = ".(!empty($commentaire)?"'".$db->escape($commentaire)."'":"NULL")."
+                        commentaire = ".(!empty($commentaire)?"'".$db->escape($commentaire)."'":"NULL").",
+                        date_creation = ".(!empty($date_creation) ? "'".$db->escape($date_creation)."'" : "date_creation")."
                     WHERE rowid = $id_sortie";
             if (!$db->query($sql)) throw new Exception("Erreur mise à jour sortie : ".$db->lasterror());
 
@@ -111,9 +117,10 @@ if ($action === 'confirm_sortie' || $action === 'update_sortie') {
             $poids_total_global     += $p;
             $nb_carton_total_global += $nbc;
 
+            $row_ent = $is_regroupement ? (int)$row_entrepots[$i] : (int)$fk_entrepot_source;
             $sqlp = "INSERT INTO ".MAIN_DB_PREFIX."pech_sortiedetprod
-                     (fk_sortie,fk_product,nb_carton,poids_total,pu,commentaire,statut,entity)
-                     VALUES ($fk_sortie,$pid,$nbc,$p,$prix,NULL,0,".(int)$conf->entity.")";
+                     (fk_sortie,fk_product,nb_carton,poids_total,pu,commentaire,statut,entity,fk_entrepot)
+                     VALUES ($fk_sortie,$pid,$nbc,$p,$prix,NULL,0,".(int)$conf->entity.", $row_ent)";
             if (!$db->query($sqlp)) throw new Exception("Erreur insertion produit ID $pid : ".$db->lasterror());
 
             $fk_sortiedetprod = $db->last_insert_id(MAIN_DB_PREFIX.'pech_sortiedetprod');

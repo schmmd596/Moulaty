@@ -508,7 +508,7 @@ if ($id_lot > 0) {
 
 // Ligne produit mixte
 print '<tr class="liste_total" id="ligneMixte">
-        <td><strong><i class="fa fa-random"></i> '.$langs->trans("MixedProduct").'</strong></td>
+        <td><strong><i class="fa fa-random"></i> AF_MIX</strong></td>
         <td class="numeric-cell"><input type="number" id="nb_plats_mixte_dispo" readonly value="0" class="form-input"></td>
         <td class="text-center"><input type="number" id="nb_plats_mixte" name="nb_plats_mixte" readonly value="0" min="0" class="form-input"></td>
         <td class="text-center"><input type="number" id="plat_par_carton_mixte" name="plat_par_carton_mixte" value="1" min="1" class="form-input"></td>

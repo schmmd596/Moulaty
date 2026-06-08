@@ -51,9 +51,10 @@ $sqljhjhjhksjkll = "SELECT ef.monnaie
               #$url = 'detail_lot.php?id='.$obj->rowid;
         }
 
-$sql_prod = "SELECT p.rowid, pr.ref, pr.label, p.nb_carton, p.poids_total, p.pu, p.total_line
+$sql_prod = "SELECT p.rowid, pr.ref, pr.label, p.nb_carton, p.poids_total, p.pu, p.total_line, p.fk_entrepot, e.ref AS entrepot_ref
              FROM ".MAIN_DB_PREFIX."pech_sortiedetprod AS p
              LEFT JOIN ".MAIN_DB_PREFIX."product AS pr ON pr.rowid = p.fk_product
+             LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e ON e.rowid = p.fk_entrepot
              WHERE p.fk_sortie = ".(int)$id;
 $resql_prod = $db->query($sql_prod);
 
@@ -178,8 +179,14 @@ print '<div class="detail-container">';
     print '<div class="detail-section">';
     print '<h3 class="section-title"><i class="fa fa-info-circle"></i> '.$langs->trans("InformationsGenerales").'</h3>';
     
-    $entrepot_src = new Entrepot($db);
-    $entrepot_src->fetch($sortie->fk_entrepot_source);
+    $entrepot_src_name = "-";
+    if (!empty($sortie->fk_entrepot_source)) {
+        $entrepot_src = new Entrepot($db);
+        $entrepot_src->fetch($sortie->fk_entrepot_source);
+        $entrepot_src_name = $entrepot_src->ref.' - '.$entrepot_src->label;
+    } else {
+        $entrepot_src_name = '<span class="badge badge-info">'.$langs->trans("Regroupement").'</span>';
+    }
 
     $entrepot_dest_name = '';
     if ($sortie->type == 0 && !empty($sortie->fk_entrepot_dest)) {
@@ -198,7 +205,7 @@ print '<div class="detail-container">';
     print '<table class="info-table">';
     print '<tr><td class="field-label"><i class="fa fa-hashtag"></i> '.$langs->trans("Reference").'</td><td class="field-value"><strong>'.$sortie->ref.'</strong></td></tr>';
     print '<tr><td class="field-label"><i class="fa fa-tag"></i> '.$langs->trans("Type").'</td><td class="field-value">'.($sortie->type == 0 ? $langs->trans("TransfertInterne") : $langs->trans("VenteClient")).'</td></tr>';
-    print '<tr><td class="field-label"><i class="fa fa-warehouse"></i> '.$langs->trans("EntrepotSource").'</td><td class="field-value">'.$entrepot_src->ref.' - '.$entrepot_src->label.'</td></tr>';
+    print '<tr><td class="field-label"><i class="fa fa-warehouse"></i> '.$langs->trans("EntrepotSource").'</td><td class="field-value">'.$entrepot_src_name.'</td></tr>';
     
     if ($sortie->type == 0) {
         print '<tr><td class="field-label"><i class="fa fa-building"></i> '.$langs->trans("EntrepotDestination").'</td><td class="field-value">'.$entrepot_dest_name.'</td></tr>';
@@ -248,6 +255,9 @@ print '<div class="detail-container">';
         print '<table class="data-table">';
         print '<thead><tr>';
         print '<th><i class="fa fa-fish"></i> '.$langs->trans("Produit").'</th>';
+        if (empty($sortie->fk_entrepot_source)) {
+            print '<th><i class="fa fa-warehouse"></i> '.$langs->trans("Entrepot").'</th>';
+        }
         print '<th class="text-right"><i class="fa fa-box"></i> '.$langs->trans("NbCartons").'</th>';
         print '<th class="text-right"><i class="fa fa-weight-hanging"></i> '.$langs->trans("Poids").' (kg)</th>';
         print '<th class="text-right"><i class="fa fa-money-bill-wave"></i> '.$langs->trans("ValeurTotale").'</th>';
@@ -271,6 +281,9 @@ print '<div class="detail-container">';
             
             print '<tr>';
             print '<td><i class="fa fa-box"></i> '.$obj->ref.' - '.$obj->label.'</td>';
+            if (empty($sortie->fk_entrepot_source)) {
+                print '<td><span class="badge-entrepot"><i class="fa fa-warehouse" style="color:#3498db; margin-right:6px;"></i>'.dol_escape_htmltag($obj->entrepot_ref).'</span></td>';
+            }
             print '<td class="text-right">'.$obj->nb_carton.'</td>';
             print '<td class="text-right">'.price($obj->poids_total).'</td>';
             print '<td class="text-right"><strong>'.price(round($valeur, 2)).' '.$conf->currency.'</strong></td>';
@@ -280,9 +293,9 @@ print '<div class="detail-container">';
         print '</tbody>';
         print '<tfoot>';
         print '<tr class="total-row">';
-        print '<td class="text-right" colspan="3"><strong>'.$langs->trans("Total").' :</strong></td>';
+        $colspan = empty($sortie->fk_entrepot_source) ? 4 : 3;
+        print '<td class="text-right" colspan="'.$colspan.'"><strong>'.$langs->trans("Total").' :</strong></td>';
         print '<td class="text-right"><strong>'.price(round($total_valeur, 2)).' '.$conf->currency.'</strong></td>';
-        //print '<td class="text-right"><strong>'.price($total_valeur).' '.$conf->currency.'</strong></td>';
         print '</tr>';
         print '</tfoot>';
         print '</table>';

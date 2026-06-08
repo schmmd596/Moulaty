@@ -304,6 +304,19 @@ $this->menu[] = array(
     'perms'     => '1'
 );
 
+$this->menu[] = array(
+    'fk_menu'   => 'fk_mainmenu=moulatyPeche,fk_leftmenu=Sortie',
+    'type'      => 'left',
+    'titre'     => 'RegroupementSortie',
+    'mainmenu'  => 'moulatyPeche',
+    'leftmenu'  => 'Sortie_regroupement',
+    'url'       => '/custom/moulatyPeche/sortie/list.php?regroupement=1',
+    'langs'     => 'moulatyPeche@moulatyPeche',
+    'position'  => 136,
+    'enabled'   => '1',
+    'perms'     => '1'
+);
+
 /** -------------------------
  *  MENU ROLES & UTILISATEURS
  * ------------------------- */

@@ -24,6 +24,7 @@ if ($res_ent && $db->num_rows($res_ent) > 0) {
 $search_ref = GETPOST('search_ref', 'alpha');
 $search_type = GETPOST('search_type', 'int');
 $search_entrepot = GETPOST('search_entrepot', 'int');
+$is_regroupement = GETPOST('regroupement', 'int');
 $search_date_start = GETPOST('search_date_start', 'alpha');
 $search_date_end = GETPOST('search_date_end', 'alpha');
 $limit = GETPOST('limit', 'int') ?: 25;
@@ -39,38 +40,68 @@ $types = array(
 
 // -----------------------------------------------------------------------------
 // Construire la requête SQL
-$sql = "SELECT s.rowid, s.ref, s.type, s.date_creation, s.fk_client, s.fk_entrepot_source, 
-               s.fk_entrepot_dest, s.poids_total, s.nb_carton_total, s.statut, s.commentaire, s.total_frais
-        FROM ".MAIN_DB_PREFIX."pech_sortie AS s
-        WHERE s.entity = ".((int)$conf->entity);
+if ($is_regroupement) {
+    $sql = "SELECT bs.rowid AS rowid_bon, bs.ref AS ref, s.type, bs.date_creation, s.fk_client, 
+                   s.fk_entrepot_dest, SUM(s.poids_total) AS poids_total, 
+                   SUM(s.nb_carton_total) AS nb_carton_total, bs.statut, 
+                   GROUP_CONCAT(DISTINCT e.ref SEPARATOR ' + ') AS entrepot_sources
+            FROM ".MAIN_DB_PREFIX."pech_bonsortie AS bs
+            INNER JOIN ".MAIN_DB_PREFIX."pech_sortie AS s ON s.fk_bonsortie = bs.rowid
+            LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e ON e.rowid = s.fk_entrepot_source
+            WHERE s.entity = ".((int)$conf->entity)." AND s.is_regroupe = 1";
+    
+    if (!empty($search_ref)) {
+        $sql .= " AND bs.ref LIKE '%".$db->escape($search_ref)."%'";
+    }
+    if ($search_type >= 0 && $search_type !== null) {
+        $sql .= " AND s.type = ".((int)$search_type);
+    }
+    if (!empty($search_date_start)) {
+        $ts_start = dol_stringtotime($search_date_start.' 00:00:00');
+        if ($ts_start !== false) $sql .= " AND bs.date_creation >= '".$db->idate($ts_start)."'";
+    }
+    if (!empty($search_date_end)) {
+        $ts_end = dol_stringtotime($search_date_end.' 23:59:59');
+        if ($ts_end !== false) $sql .= " AND bs.date_creation <= '".$db->idate($ts_end)."'";
+    }
+    
+    $sql .= " GROUP BY bs.rowid, bs.ref, s.type, bs.date_creation, s.fk_client, s.fk_entrepot_dest, bs.statut";
+    $sql .= " ORDER BY bs.date_creation DESC ".$db->plimit($limit + 1, $offset);
+} else {
+    $sql = "SELECT s.rowid, s.ref, s.type, s.date_creation, s.fk_client, s.fk_entrepot_source, 
+                   s.fk_entrepot_dest, s.poids_total, s.nb_carton_total, s.statut, s.commentaire, s.total_frais
+            FROM ".MAIN_DB_PREFIX."pech_sortie AS s
+            WHERE s.entity = ".((int)$conf->entity)." AND s.is_regroupe = 0";
 
-if (!empty($entrepots_accessibles)) {
-    $sql .= " AND s.fk_entrepot_source IN (".implode(',', $entrepots_accessibles).")";
-}
-if (!empty($search_ref)) {
-    $sql .= " AND s.ref LIKE '%".$db->escape($search_ref)."%'";
-}
-if ($search_type >= 0 && $search_type !== null) {
-    $sql .= " AND s.type = ".((int)$search_type);
-}
-if (!empty($search_entrepot) and $search_entrepot > 0) {
-    $sql .= " AND s.fk_entrepot_source = ".((int)$search_entrepot);
-}
-if (!empty($search_date_start)) {
-    $ts_start = dol_stringtotime($search_date_start.' 00:00:00');
-    if ($ts_start !== false) $sql .= " AND s.date_creation >= '".$db->idate($ts_start)."'";
-}
-if (!empty($search_date_end)) {
-    $ts_end = dol_stringtotime($search_date_end.' 23:59:59');
-    if ($ts_end !== false) $sql .= " AND s.date_creation <= '".$db->idate($ts_end)."'";
-}
+    if (!empty($entrepots_accessibles)) {
+        $sql .= " AND s.fk_entrepot_source IN (".implode(',', $entrepots_accessibles).")";
+    }
+    if (!empty($search_ref)) {
+        $sql .= " AND s.ref LIKE '%".$db->escape($search_ref)."%'";
+    }
+    if ($search_type >= 0 && $search_type !== null) {
+        $sql .= " AND s.type = ".((int)$search_type);
+    }
+    if (!empty($search_entrepot) && $search_entrepot > 0) {
+        $sql .= " AND s.fk_entrepot_source = ".((int)$search_entrepot);
+    }
+    if (!empty($search_date_start)) {
+        $ts_start = dol_stringtotime($search_date_start.' 00:00:00');
+        if ($ts_start !== false) $sql .= " AND s.date_creation >= '".$db->idate($ts_start)."'";
+    }
+    if (!empty($search_date_end)) {
+        $ts_end = dol_stringtotime($search_date_end.' 23:59:59');
+        if ($ts_end !== false) $sql .= " AND s.date_creation <= '".$db->idate($ts_end)."'";
+    }
 
-$sql .= " ORDER BY s.date_creation DESC ".$db->plimit($limit + 1, $offset);
+    $sql .= " ORDER BY s.date_creation DESC ".$db->plimit($limit + 1, $offset);
+}
 $resql = $db->query($sql);
 
 // -----------------------------------------------------------------------------
 // HEADER
-llxHeader('', $langs->trans("ListeBonsSortie"));
+$page_title = $is_regroupement ? $langs->trans("RegroupementSortie") : $langs->trans("ListeBonsSortie");
+llxHeader('', $page_title);
 
 // Inclusion du CSS global pour les listes
 print '<link rel="stylesheet" href="../reception_list_style.css">';
@@ -200,7 +231,7 @@ echo '
 </style>';
 print '<div class="reception-list-container">';
 print '<div class="reception-list-header">';
-print load_fiche_titre('<i class="fa fa-box"></i> '.$langs->trans("ListeBonsSortie"), '', 'object_list');
+print load_fiche_titre('<i class="fa fa-box"></i> '.$page_title, '', 'object_list');
 print '</div>';
 
 // -----------------------------------------------------------------------------
@@ -210,7 +241,7 @@ print '<table class="search-table">';
 print '<tr>';
 print '<th>'.$langs->trans("Reference").'</th>';
 print '<th>'.$langs->trans("Type").'</th>';
-print '<th>'.$langs->trans("EntrepotSource").'</th>';
+if (!$is_regroupement) print '<th>'.$langs->trans("EntrepotSource").'</th>';
 print '<th>'.$langs->trans("DateDebut").'</th>';
 print '<th>'.$langs->trans("DateFin").'</th>';
 print '<th>'.$langs->trans("LignesPage").'</th>';
@@ -231,7 +262,7 @@ if ($resEntrepot) {
         $entrepots[$objEnt->rowid] = $objEnt->ref;
     }
 }
-print '<td>'.$form->selectarray('search_entrepot', $entrepots, $search_entrepot, 1, 0, 0, '', 0, 0, 0, 'class="search-select"').'</td>';
+if (!$is_regroupement) print '<td>'.$form->selectarray('search_entrepot', $entrepots, $search_entrepot, 1, 0, 0, '', 0, 0, 0, 'class="search-select"').'</td>';
 
 // Dates
 print '<td><input type="date" name="search_date_start" class="search-input" value="'.dol_escape_htmltag($search_date_start).'"></td>';
@@ -253,9 +284,23 @@ if ($resql) {
     $i = 0;
 
     if ($num > 0) {
+        if (!$is_regroupement) {
+            print '<form method="post" action="regrouper.php" id="formRegrouper">';
+            print '<input type="hidden" name="token" value="'.newToken().'">';
+            
+            // Bouton de regroupement en haut
+            print '<div class="group-action-bar" id="group_action_container" style="display:none; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">';
+            print '<span style="font-weight: 600; color: #1e293b;"><i class="fa fa-info-circle" style="color:#3b82f6; margin-right:8px;"></i>Sélectionnez les sorties du même client ou même entrepôt pour les regrouper.</span>';
+            print '<button type="submit" class="search-button" style="margin:0; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white;"><i class="fa fa-object-group" style="margin-right:8px;"></i>Regrouper et confirmer</button>';
+            print '</div>';
+        }
+
         print '<div class="results-table-container">';
         print '<table class="results-table">';
         print '<thead><tr>';
+        if (!$is_regroupement) {
+            print '<th class="col-checkbox" style="width: 40px; text-align:center;"><input type="checkbox" id="check_all_sorties" onclick="toggleAllSorties(this)"></th>';
+        }
         print '<th class="col-ref"><i class="fas fa-barcode"></i> '.$langs->trans("Reference").'</th>';
         print '<th class="col-type"><i class="fas fa-boxes"></i> '.$langs->trans("Type").'</th>';
         print '<th class="col-fournisseur"><i class="fas fa-warehouse"></i> '.$langs->trans("EntrepotSource").'</th>';
@@ -292,9 +337,13 @@ if ($resql) {
             }
 
             $entrepotSrc = $entrepotDst = '';
-            if ($obj->fk_entrepot_source) {
-                $ent = new Entrepot($db);
-                if ($ent->fetch($obj->fk_entrepot_source) > 0) $entrepotSrc = $ent->ref;
+            if ($is_regroupement) {
+                $entrepotSrc = $obj->entrepot_sources;
+            } else {
+                if ($obj->fk_entrepot_source) {
+                    $ent = new Entrepot($db);
+                    if ($ent->fetch($obj->fk_entrepot_source) > 0) $entrepotSrc = $ent->ref;
+                }
             }
             if ($obj->fk_entrepot_dest) {
                 $ent = new Entrepot($db);
@@ -305,47 +354,53 @@ if ($resql) {
             }
 
             print '<tr>';
-            print '<td class="col-ref"><a href="detail.php?id='.$obj->rowid.'" style="color:#3498db; font-weight:500;">'.dol_escape_htmltag($obj->ref).'</a></td>';
+            if (!$is_regroupement) {
+                print '<td class="col-checkbox" style="text-align:center;"><input type="checkbox" name="selected_sorties[]" value="'.$obj->rowid.'" data-client="'.(int)$obj->fk_client.'" data-dest="'.(int)$obj->fk_entrepot_dest.'" data-type="'.(int)$obj->type.'" class="sortie-checkbox"></td>';
+            }
+            if ($is_regroupement) {
+                print '<td class="col-ref"><a href="bonsortie_document.php?id='.$obj->rowid_bon.'" style="color:#3498db; font-weight:500;">'.dol_escape_htmltag($obj->ref).'</a></td>';
+            } else {
+                print '<td class="col-ref"><a href="detail.php?id='.$obj->rowid.'" style="color:#3498db; font-weight:500;">'.dol_escape_htmltag($obj->ref).'</a></td>';
+            }
             print '<td class="col-type">'.$typeLabel.'</td>';
-            //print '<td class="col-fournisseur">'.dol_escape_htmltag($entrepotSrc).'</td>';
-            //print '<td class="col-destination">'.dol_escape_htmltag($entrepotDst).'</td>';
             // Colonne Entrepôt source avec span stylé
-print '<td class="col-fournisseur">';
-print '<span class="badge-entrepot">';
-print '<i class="fa fa-warehouse" style="color:#3498db; margin-right:6px;"></i>';
-print dol_escape_htmltag($entrepotSrc);
-print '</span>';
-print '</td>';
+            print '<td class="col-fournisseur">';
+            print '<span class="badge-entrepot">';
+            print '<i class="fa fa-warehouse" style="color:#3498db; margin-right:6px;"></i>';
+            print dol_escape_htmltag($entrepotSrc);
+            print '</span>';
+            print '</td>';
 
-// Colonne Destination avec span stylé
-print '<td class="col-destination">';
-if (!empty($entrepotDst)) {
-    print '<span class="badge-destination">';
-    print '<i class="fa fa-truck-moving" style="color:#e67e22; margin-right:6px;"></i>';
-    print dol_escape_htmltag($entrepotDst);
-    print '</span>';
-} else {
-    print '<span class="badge-empty">-</span>';
-}
-print '</td>';
+            // Colonne Destination avec span stylé
+            print '<td class="col-destination">';
+            if (!empty($entrepotDst)) {
+                print '<span class="badge-destination">';
+                print '<i class="fa fa-truck-moving" style="color:#e67e22; margin-right:6px;"></i>';
+                print dol_escape_htmltag($entrepotDst);
+                print '</span>';
+            } else {
+                print '<span class="badge-empty">-</span>';
+            }
+            print '</td>';
 
-print '<td class="col-date">'.dol_print_date(dol_stringtotime($obj->date_creation), 'dayhour').'</td>';
-print '<td class="col-poids">'.price($obj->poids_total).'</td>';
+            print '<td class="col-date">'.dol_print_date(dol_stringtotime($obj->date_creation), 'dayhour').'</td>';
+            print '<td class="col-poids">'.price($obj->poids_total).'</td>';
 
-// Colonne Nombre de cartons avec span stylé
-print '<td class="col-cartons">';
-print '<span class="badge-cartons">';
-print '<i class="fa fa-box" style="color:#9b59b6; margin-right:6px;"></i>';
-print '<strong>'.(int)$obj->nb_carton_total.'</strong>';
-print '</span>';
-print '</td>';
-            //print '<td class="col-date">'.dol_print_date(dol_stringtotime($obj->date_creation), 'dayhour').'</td>';
-            //print '<td class="col-poids">'.price($obj->poids_total).'</td>';
-            //print '<td class="col-cartons">'.(int)$obj->nb_carton_total.'</td>';
+            // Colonne Nombre de cartons avec span stylé
+            print '<td class="col-cartons">';
+            print '<span class="badge-cartons">';
+            print '<i class="fa fa-box" style="color:#9b59b6; margin-right:6px;"></i>';
+            print '<strong>'.(int)$obj->nb_carton_total.'</strong>';
+            print '</span>';
+            print '</td>';
             print '<td class="col-frais">'.price($obj->total_frais).'</td>';
             print '<td class="col-etat">'.$statutLabel.'</td>';
             print '<td class="col-actions">';
-            print '<a class="action-button" href="detail.php?id='.$obj->rowid.'"><i class="fa fa-eye"></i> '.$langs->trans("VoirDetails").'</a>';
+            if ($is_regroupement) {
+                print '<a class="action-button" href="bonsortie_document.php?id='.$obj->rowid_bon.'"><i class="fa fa-eye"></i> '.$langs->trans("VoirDetails").'</a>';
+            } else {
+                print '<a class="action-button" href="detail.php?id='.$obj->rowid.'"><i class="fa fa-eye"></i> '.$langs->trans("VoirDetails").'</a>';
+            }
             print '</td>';
             print '</tr>';
         }
@@ -353,13 +408,17 @@ print '</td>';
         print '</tbody></table>';
         print '</div>';
 
+        if (!$is_regroupement) {
+            print '</form>';
+        }
+
         $hasMore = ($num > $limit) ? true : false;
 
         // -----------------------------------------------------------------------------
         // PAGINATION
         function build_query_preserve($overrides = array()) {
             $params = array();
-            $keys = array('search_ref','search_type','search_entrepot','search_date_start','search_date_end','limit','page');
+            $keys = array('search_ref','search_type','search_entrepot','search_date_start','search_date_end','limit','page','regroupement');
             foreach ($keys as $k) {
                 if (isset($_GET[$k]) && $_GET[$k] !== '') $params[$k] = $_GET[$k];
             }
@@ -374,9 +433,13 @@ print '</td>';
         }
         
         // Affichage des numéros de page
-        $total_sql = "SELECT COUNT(*) as total FROM ".MAIN_DB_PREFIX."pech_sortie AS s WHERE s.entity = ".((int)$conf->entity);
-        if (!empty($entrepots_accessibles)) {
-            $total_sql .= " AND s.fk_entrepot_source IN (".implode(',', $entrepots_accessibles).")";
+        if ($is_regroupement) {
+            $total_sql = "SELECT COUNT(DISTINCT s.fk_bonsortie) as total FROM ".MAIN_DB_PREFIX."pech_sortie AS s WHERE s.entity = ".((int)$conf->entity)." AND s.is_regroupe = 1";
+        } else {
+            $total_sql = "SELECT COUNT(*) as total FROM ".MAIN_DB_PREFIX."pech_sortie AS s WHERE s.entity = ".((int)$conf->entity)." AND s.is_regroupe = 0";
+            if (!empty($entrepots_accessibles)) {
+                $total_sql .= " AND s.fk_entrepot_source IN (".implode(',', $entrepots_accessibles).")";
+            }
         }
         $total_res = $db->query($total_sql);
         $total_obj = $total_res ? $db->fetch_object($total_res) : null;
@@ -410,6 +473,75 @@ print '</td>';
 }
 
 print '</div>'; // .reception-list-container
+
+if (!$is_regroupement) {
+?>
+<script>
+function toggleAllSorties(master) {
+    var checkboxes = document.querySelectorAll('.sortie-checkbox');
+    checkboxes.forEach(function(cb) {
+        cb.checked = master.checked;
+    });
+    toggleGroupButton();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var checkboxes = document.querySelectorAll('.sortie-checkbox');
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', toggleGroupButton);
+    });
+    
+    var form = document.getElementById('formRegrouper');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            var checked = document.querySelectorAll('.sortie-checkbox:checked');
+            if (checked.length < 2) {
+                alert("Veuillez sélectionner au moins 2 sorties pour faire un regroupement.");
+                e.preventDefault();
+                return;
+            }
+            
+            var firstType = checked[0].getAttribute('data-type');
+            var firstClient = checked[0].getAttribute('data-client');
+            var firstDest = checked[0].getAttribute('data-dest');
+            
+            for (var i = 1; i < checked.length; i++) {
+                var type = checked[i].getAttribute('data-type');
+                var client = checked[i].getAttribute('data-client');
+                var dest = checked[i].getAttribute('data-dest');
+                
+                if (type !== firstType) {
+                    alert("Toutes les sorties sélectionnées doivent être du même type (Vente ou Transfert).");
+                    e.preventDefault();
+                    return;
+                }
+                
+                if (firstType === '1' && client !== firstClient) {
+                    alert("Toutes les sorties sélectionnées doivent être destinées au même client.");
+                    e.preventDefault();
+                    return;
+                }
+                
+                if (firstType === '0' && dest !== firstDest) {
+                    alert("Toutes les sorties sélectionnées doivent être destinées au même entrepôt.");
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+    }
+});
+
+function toggleGroupButton() {
+    var checked = document.querySelectorAll('.sortie-checkbox:checked');
+    var btnContainer = document.getElementById('group_action_container');
+    if (btnContainer) {
+        btnContainer.style.display = checked.length > 0 ? 'flex' : 'none';
+    }
+}
+</script>
+<?php
+}
 
 llxFooter();
 $db->close();

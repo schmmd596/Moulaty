@@ -48,7 +48,7 @@ try {
 
         $product->correct_stock(
             $user,
-            $sortie->fk_entrepot_source,
+            $objProd->fk_entrepot,
             -$objProd->poids_total,
             0,
             'Vente client #'.$client_name.' - Sortie #'.$sortie->ref,

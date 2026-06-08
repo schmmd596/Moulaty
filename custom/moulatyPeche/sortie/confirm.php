@@ -22,6 +22,8 @@ $fk_entrepot_source = GETPOST('fk_entrepot_source', 'int');
 $fk_entrepot_dest = GETPOST('fk_entrepot_dest', 'int');
 $fk_client = GETPOST('fk_client_dest', 'int');
 $id_sortie = GETPOST('id', 'int');
+$is_regroupement = GETPOST('is_regroupement', 'int');
+$date_creation = GETPOST('date_creation', 'none');
 
 // ============================================================================
 // 🔹 MODE MODIFICATION SI ID EXISTANT
@@ -94,6 +96,8 @@ if ($type_sortie == 0) {
     print '<input type="hidden" name="fk_client" value="'.$fk_client.'">';
 }
 print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="is_regroupement" value="'.$is_regroupement.'">';
+print '<input type="hidden" name="date_creation" value="'.$date_creation.'">';
 
 // ============================================================================
 // 🔹 INFORMATIONS GÉNÉRALES
@@ -107,10 +111,17 @@ print '<table class="filter-table">';
 print '<tr class="liste_titre"><th colspan="2">'.$langs->trans("DetailsSortie").'</th></tr>';
 
 // Entrepôt source
-print '<tr>';
-print '<td width="35%"><label class="selection-label"><i class="fa fa-warehouse"></i> '.$langs->trans("EntrepotSource").'</label></td>';
-print '<td><strong>'.dol_escape_htmltag($entrepot_src->ref).'</strong></td>';
-print '</tr>';
+if (!$is_regroupement) {
+    print '<tr>';
+    print '<td width="35%"><label class="selection-label"><i class="fa fa-warehouse"></i> '.$langs->trans("EntrepotSource").'</label></td>';
+    print '<td><strong>'.dol_escape_htmltag($entrepot_src->ref).'</strong></td>';
+    print '</tr>';
+} else {
+    print '<tr>';
+    print '<td width="35%"><label class="selection-label"><i class="fa fa-layer-group"></i> '.$langs->trans("Regroupement").'</label></td>';
+    print '<td><span class="selection-badge badge-info">'.$langs->trans("Oui").'</span></td>';
+    print '</tr>';
+}
 
 // Entrepôt destination ou client selon le type
 if ($type_sortie == 0 && $fk_entrepot_dest) {
@@ -174,6 +185,7 @@ if ($isEditMode) {
     $nb_carton = GETPOST('nb_carton', 'array');
     $poids = GETPOST('poids', 'array');
     $cartons_rowids = GETPOST('cartons_rowid', 'array');
+    $row_entrepots = GETPOST('row_entrepots', 'array');
 }
 
 $totalCartons = 0;
@@ -183,6 +195,9 @@ print '<div class="selection-table-container">';
 print '<table class="selection-table">';
 print '<thead>';
 print '<tr>';
+if ($is_regroupement) {
+    print '<th><i class="fa fa-warehouse"></i> '.$langs->trans("Entrepot").'</th>';
+}
 print '<th><i class="fa fa-cube"></i> '.$langs->trans("Produit").'</th>';
 print '<th class="center"><i class="fa fa-hashtag"></i> '.$langs->trans("Cartons").'</th>';
 print '<th class="center"><i class="fa fa-balance-scale"></i> '.$langs->trans("PoidsTotal").'kg</th>';
@@ -202,6 +217,15 @@ if (!empty($products)) {
         $totalPoids += $poidsTotal;
 
         print '<tr>';
+        if ($is_regroupement) {
+            $ent_id = isset($row_entrepots[$i]) ? $row_entrepots[$i] : 0;
+            $ent = new Entrepot($db);
+            if ($ent_id > 0) $ent->fetch($ent_id);
+            print '<td><strong>'.dol_escape_htmltag($ent->ref).'</strong>';
+            print '<input type="hidden" name="row_entrepots[]" value="'.$ent_id.'">';
+            print '</td>';
+        }
+        
         print '<td>';
         print '<strong>'.dol_escape_htmltag($prod->ref).'</strong><br>';
         print '<small class="opacitymedium">'.dol_escape_htmltag($prod->label).'</small>';
@@ -219,7 +243,8 @@ if (!empty($products)) {
 
     // Ligne total
     print '<tr class="liste_total" style="background: linear-gradient(135deg, #cfd6f7ff 0%, #dfc6f8ff 100%); color: white; font-weight: bold;">';
-    print '<td class="right"><strong>'.$langs->trans("Total").'</strong></td>';
+    $colspan = $is_regroupement ? 2 : 1;
+    print '<td class="right" colspan="'.$colspan.'"><strong>'.$langs->trans("Total").'</strong></td>';
     print '<td class="center"><strong>'.$totalCartons.'</strong></td>';
     print '<td class="center"><strong>'.price($totalPoids).'</strong></td>';
     print '</tr>';

@@ -228,8 +228,8 @@ try {
     $total_restants = GETPOST('nb_plats_mixte', 'int');   
 
     if ($total_restants > 0) {
-        // Récupération de l'ID du produit "mixte"
-        $sqlProductMixte = "SELECT rowid FROM ".MAIN_DB_PREFIX."product WHERE label = 'MIXTE' LIMIT 1";
+        // Récupération de l'ID du produit "AF_MIX"
+        $sqlProductMixte = "SELECT rowid FROM ".MAIN_DB_PREFIX."product WHERE ref = 'AF_MIX' OR label = 'AF_MIX' LIMIT 1";
         $resMixte = $db->query($sqlProductMixte);
         $fk_product_mixte = null;
         
@@ -264,7 +264,7 @@ try {
                         ".((int)$plat_par_carton_mixte_val).",
                         ".((int)$nb_cartons_mixte).",
                         100,
-                        'Produit mixte',
+                        'AF MIX',
                         NOW()
                     )";
         
