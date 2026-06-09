@@ -77,7 +77,7 @@ try {
                     " . $user->id . ",
                     NULL,
                     " . ($first_dest ? (int)$first_dest : "NULL") . ",
-                    'Bon de sortie regroupé pour : " . implode(', ', array_map(function($s) { return $s->ref; }, $sorties)) . "',
+                    NULL,
                     1,
                     " . $conf->entity . "
                 )";
@@ -86,7 +86,9 @@ try {
     }
     $bon_id = $db->last_insert_id(MAIN_DB_PREFIX . "pech_bonsortie");
     
-    // 4️⃣ Copier les produits et les services des sorties vers le bon de sortie regroupé
+    // 4️⃣ Agrégations des produits et copie des services des sorties vers le bon de sortie regroupé
+    $aggregated_products = array();
+    
     foreach ($sorties as $sortie) {
         // A. Produits
         $sql_prod = "SELECT p.rowid, p.fk_product, p.nb_carton, p.poids_total, pr.label
@@ -107,25 +109,46 @@ try {
                     $valeur_carton = (float) $db->fetch_object($res_carton)->total_carton;
                 }
 
-                $sql_insert_prod = "INSERT INTO " . MAIN_DB_PREFIX . "pech_bonsortie_detprod (
-                                        fk_bonentree, fk_product, nb_carton, poids_carton, valeur, commentaire, statut, entity
-                                    ) VALUES (
-                                        " . $bon_id . ",
-                                        " . $obj->fk_product . ",
-                                        " . (int)$obj->nb_carton . ",
-                                        " . ((float)$obj->poids_total / max($obj->nb_carton, 1)) . ",
-                                        " . ((float)$valeur_carton) . ",
-                                        '" . $db->escape($obj->label) . "',
-                                        0,
-                                        " . $conf->entity . "
-                                    )";
-                if (!$db->query($sql_insert_prod)) {
-                    throw new Exception("Erreur lors de l'insertion du produit : " . $db->lasterror());
+                $pid = (int)$obj->fk_product;
+                if (!isset($aggregated_products[$pid])) {
+                    $aggregated_products[$pid] = array(
+                        'fk_product' => $pid,
+                        'nb_carton' => 0,
+                        'poids_total' => 0.0,
+                        'valeur' => 0.0,
+                        'label' => $obj->label
+                    );
                 }
+                $aggregated_products[$pid]['nb_carton'] += (int)$obj->nb_carton;
+                $aggregated_products[$pid]['poids_total'] += (float)$obj->poids_total;
+                $aggregated_products[$pid]['valeur'] += (float)$valeur_carton;
             }
         }
+    }
 
-        // B. Services
+    // Insertion des produits agrégés
+    foreach ($aggregated_products as $p) {
+        $poids_carton = ($p['nb_carton'] > 0) ? ($p['poids_total'] / $p['nb_carton']) : 0.0;
+        
+        $sql_insert_prod = "INSERT INTO " . MAIN_DB_PREFIX . "pech_bonsortie_detprod (
+                                fk_bonentree, fk_product, nb_carton, poids_carton, valeur, commentaire, statut, entity
+                            ) VALUES (
+                                " . $bon_id . ",
+                                " . $p['fk_product'] . ",
+                                " . $p['nb_carton'] . ",
+                                " . number_format($poids_carton, 4, '.', '') . ",
+                                " . number_format($p['valeur'], 4, '.', '') . ",
+                                '" . $db->escape($p['label']) . "',
+                                0,
+                                " . $conf->entity . "
+                            )";
+        if (!$db->query($sql_insert_prod)) {
+            throw new Exception("Erreur lors de l'insertion du produit agrégé : " . $db->lasterror());
+        }
+    }
+
+    // B. Services
+    foreach ($sorties as $sortie) {
         $sql_serv = "SELECT * FROM " . MAIN_DB_PREFIX . "pech_sortiedetservice WHERE fk_sortie = " . $sortie->rowid;
         $res_serv = $db->query($sql_serv);
         if ($res_serv && $db->num_rows($res_serv) > 0) {

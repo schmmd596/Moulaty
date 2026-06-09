@@ -69,9 +69,9 @@ if ($is_regroupement) {
     $sql .= " ORDER BY bs.date_creation DESC ".$db->plimit($limit + 1, $offset);
 } else {
     $sql = "SELECT s.rowid, s.ref, s.type, s.date_creation, s.fk_client, s.fk_entrepot_source, 
-                   s.fk_entrepot_dest, s.poids_total, s.nb_carton_total, s.statut, s.commentaire, s.total_frais
+                   s.fk_entrepot_dest, s.poids_total, s.nb_carton_total, s.statut, s.commentaire, s.total_frais, s.is_regroupe
             FROM ".MAIN_DB_PREFIX."pech_sortie AS s
-            WHERE s.entity = ".((int)$conf->entity)." AND s.is_regroupe = 0";
+            WHERE s.entity = ".((int)$conf->entity);
 
     if (!empty($entrepots_accessibles)) {
         $sql .= " AND s.fk_entrepot_source IN (".implode(',', $entrepots_accessibles).")";
@@ -355,7 +355,13 @@ if ($resql) {
 
             print '<tr>';
             if (!$is_regroupement) {
-                print '<td class="col-checkbox" style="text-align:center;"><input type="checkbox" name="selected_sorties[]" value="'.$obj->rowid.'" data-client="'.(int)$obj->fk_client.'" data-dest="'.(int)$obj->fk_entrepot_dest.'" data-type="'.(int)$obj->type.'" class="sortie-checkbox"></td>';
+                print '<td class="col-checkbox" style="text-align:center;">';
+                if ($obj->is_regroupe) {
+                    print '<i class="fa fa-link" style="color:#3498db;" title="Déjà regroupée"></i>';
+                } else {
+                    print '<input type="checkbox" name="selected_sorties[]" value="'.$obj->rowid.'" data-client="'.(int)$obj->fk_client.'" data-dest="'.(int)$obj->fk_entrepot_dest.'" data-type="'.(int)$obj->type.'" class="sortie-checkbox">';
+                }
+                print '</td>';
             }
             if ($is_regroupement) {
                 print '<td class="col-ref"><a href="bonsortie_document.php?id='.$obj->rowid_bon.'" style="color:#3498db; font-weight:500;">'.dol_escape_htmltag($obj->ref).'</a></td>';
@@ -436,7 +442,7 @@ if ($resql) {
         if ($is_regroupement) {
             $total_sql = "SELECT COUNT(DISTINCT s.fk_bonsortie) as total FROM ".MAIN_DB_PREFIX."pech_sortie AS s WHERE s.entity = ".((int)$conf->entity)." AND s.is_regroupe = 1";
         } else {
-            $total_sql = "SELECT COUNT(*) as total FROM ".MAIN_DB_PREFIX."pech_sortie AS s WHERE s.entity = ".((int)$conf->entity)." AND s.is_regroupe = 0";
+            $total_sql = "SELECT COUNT(*) as total FROM ".MAIN_DB_PREFIX."pech_sortie AS s WHERE s.entity = ".((int)$conf->entity);
             if (!empty($entrepots_accessibles)) {
                 $total_sql .= " AND s.fk_entrepot_source IN (".implode(',', $entrepots_accessibles).")";
             }
