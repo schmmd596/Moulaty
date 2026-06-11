@@ -339,7 +339,8 @@ print '<div class="detail-container">';
     if ($sortie->statut == 0) {
         print '<a href="delete_sortie.php?id='.$id.'" class="detail-button detail-button-danger" onclick="return confirm(\''.$langs->trans("ConfirmerSuppression").'\')"><i class="fa fa-trash"></i> '.$langs->trans("Supprimer").'</a>';
         print '<a href="validate.php?id='.$id.'" class="detail-button detail-button-success"><i class="fa fa-check"></i> '.$langs->trans("ValiderSortie").'</a>';
-    } else {
+    } elseif ($sortie->statut == 1) {
+        // Statut : Validé
         if (!empty($sortie->fk_facture)) {
             print '<a href="'.DOL_URL_ROOT.'/fourn/facture/card.php?id='.$sortie->fk_facture.'" class="detail-button detail-button-primary"><i class="fa fa-eye"></i> '.$langs->trans("VoirFacture").'</a>';
         } else {
@@ -353,16 +354,15 @@ print '<div class="detail-container">';
             $url_creer = 'bon_sortie.php?id_sortie='.$id;
             print '<a href="'.$url_creer.'" class="detail-button detail-button-success"><i class="fa fa-plus-circle"></i> '.$langs->trans("CreerBonSortie").'</a>';
         }
-        //print '<a href="brouillon.php?id='.$id.'" class="detail-button detail-button-danger" onclick="return confirm(\''.$langs->trans("Confirm").\'' \''.$langs->trans("SetToDraft").'\')><i class="fa fa-undo"></i> '.$langs->trans("SetToDraft").'</a>';
-        if ($sortie->fk_facture_client){
+
+        if ($sortie->fk_facture_client) {
             print '<a href="annuler_fact_client.php?id='.$id.'" class="detail-button detail-button-danger" onclick="return confirm(\''.$langs->trans('Confirm').' '.$langs->trans('SetToDraft').' ?\')"><i class="fa fa-undo"></i> '.$langs->trans('Annuler la facture client').'</a>';
-        
-        }else{
+        } else {
             print '<a href="brouillon.php?id='.$id.'" class="detail-button detail-button-danger" onclick="return confirm(\''.$langs->trans('Confirm').' '.$langs->trans('SetToDraft').' ?\')"><i class="fa fa-undo"></i> '.$langs->trans('SetToDraft').'</a>';
-        
         }
+
         print '<a href="lot_sortis.php?id='.$id.'" class="detail-button detail-button-success"><i class="fa fa-eye"></i> '.$langs->trans("Details").'</a>';
-  
+
         // Bouton de transfert/facturation
         $can_transfer = ($sortie->statut == 1 && !empty($sortie->fk_bonsortie) && !empty($sortie->fk_facture));
         if ($sortie->type == 0) {
@@ -374,18 +374,36 @@ print '<div class="detail-container">';
         }
 
         if ($can_transfer) {
-            //print '<a href="'.$url.'" class="detail-button detail-button-primary" onclick="return confirm(\''.$langs->trans("ConfirmerTransfert").'\')"><i class="fa fa-truck"></i> '.$label.'</a>';
-        
-print '</br><a href="'.$url.'" class="detail-button-recommended" onclick="return confirm(\''.$langs->trans("ConfirmerTransfert").'\')">';
-print '<div class="button-glow"></div>';
-print '<div class="button-inner">';
-print '<i class="fa fa-truck"></i> ';
-print '<span>'.$label.'</span>';
-print '</div>';
-print '</a>';
-
+            print '</br><a href="'.$url.'" class="detail-button-recommended" onclick="return confirm(\''.$langs->trans("ConfirmerTransfert").'\')">';
+            print '<div class="button-glow"></div>';
+            print '<div class="button-inner">';
+            print '<i class="fa fa-truck"></i> ';
+            print '<span>'.$label.'</span>';
+            print '</div>';
+            print '</a>';
         } else {
             print '<span class="detail-button detail-button-secondary" style="opacity:0.6; cursor:not-allowed;" title="'.$langs->trans("ImpossibleTransferer").'"><i class="fa fa-truck"></i> '.$label.'</span>';
+        }
+
+    } elseif ($sortie->statut == 2) {
+        // Statut : Transféré/Facturé
+        print '<a href="lot_sortis.php?id='.$id.'" class="detail-button detail-button-success"><i class="fa fa-eye"></i> '.$langs->trans("Details").'</a>';
+
+        if ($sortie->fk_bonsortie > 0) {
+            if ($sortie->type == 0) {
+                $url_bon = 'bonsortie_document.php?id='.$sortie->fk_bonsortie;
+            } else {
+                $url_bon = 'bonsortie_document.php?id='.$sortie->fk_bonsortie;
+            }
+            print '<a href="'.$url_bon.'" class="detail-button detail-button-info"><i class="fa fa-eye"></i> '.$langs->trans("VoirBonSortie").'</a>';
+        }
+
+        if (!empty($sortie->fk_facture_client)) {
+            // Annuler la facture client (vente type 1)
+            print '<a href="annuler_fact_client.php?id='.$id.'" class="detail-button detail-button-danger" onclick="return confirm(\''.$langs->trans('Confirm').' '.$langs->trans('SetToDraft').' ?\')"><i class="fa fa-undo"></i> '.$langs->trans('Annuler la facture client').'</a>';
+        } elseif ($sortie->type == 0) {
+            // Annuler le transfert interne (type 0) — remet la sortie au statut Validé
+            print '<a href="annuler_transfere.php?id='.$id.'" class="detail-button detail-button-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir annuler ce transfert ? Cette action va supprimer le lot créé dans l\'entrepôt de destination et inverser les mouvements de stock.\')"><i class="fa fa-undo"></i> Annuler le transfert</a>';
         }
     }
 
