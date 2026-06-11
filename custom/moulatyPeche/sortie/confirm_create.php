@@ -117,10 +117,9 @@ if ($action === 'confirm_sortie' || $action === 'update_sortie') {
             $poids_total_global     += $p;
             $nb_carton_total_global += $nbc;
 
-            $row_ent = $is_regroupement ? (int)$row_entrepots[$i] : (int)$fk_entrepot_source;
             $sqlp = "INSERT INTO ".MAIN_DB_PREFIX."pech_sortiedetprod
-                     (fk_sortie,fk_product,nb_carton,poids_total,pu,commentaire,statut,entity,fk_entrepot)
-                     VALUES ($fk_sortie,$pid,$nbc,$p,$prix,NULL,0,".(int)$conf->entity.", $row_ent)";
+                     (fk_sortie,fk_product,nb_carton,poids_total,pu,commentaire,statut,entity)
+                     VALUES ($fk_sortie,$pid,$nbc,$p,$prix,NULL,0,".(int)$conf->entity.")";
             if (!$db->query($sqlp)) throw new Exception("Erreur insertion produit ID $pid : ".$db->lasterror());
 
             $fk_sortiedetprod = $db->last_insert_id(MAIN_DB_PREFIX.'pech_sortiedetprod');

@@ -147,6 +147,15 @@ print '<td><label class="selection-label"><i class="fa fa-user-tie"></i> '.$lang
 print '<td>'.$form->selectarray('fk_client_dest', $clients, $fk_client_dest, 1, 0, 0, '', 'filter-input').'</td>';
 print '</tr>';
 
+// --- Date de création (obligatoire) ---
+print '<tr>';
+print '<td><label class="selection-label"><i class="fa fa-calendar-alt"></i> '.$langs->trans("DateCreation").'</label></td>';
+print '<td><input type="datetime-local" name="date_creation" id="date_creation" value="" required ';
+print 'style="padding:10px 12px; border:2px solid #e74c3c; border-radius:6px; font-size:14px; width:250px; background:#fff; color:#333; box-shadow:0 2px 5px rgba(0,0,0,0.05);" ';
+print 'oninput="if(this.value){this.style.borderColor=\'#27ae60\';}else{this.style.borderColor=\'#e74c3c\';}">';
+print '</td>';
+print '</tr>';
+
 print '</table>';
 
 // --- Bouton de confirmation ---

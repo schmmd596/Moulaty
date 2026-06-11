@@ -382,22 +382,18 @@ if (!empty($selected_ids)) {
 print '<div class="warehouse-info">';
 print '<strong><i class="fa fa-warehouse"></i> '.$langs->trans("Warehouse").' :</strong> '.dol_escape_htmltag($ref_entrepot);
 print '</div>';
-$date_creation_val = dol_print_date(time(), '%Y-%m-%dT%H:%M'); // valeur par défaut = maintenant
-if (!empty($bon->date_creation)) {
-    $date_creation_val = date('Y-m-d\TH:i', strtotime($bon->date_creation));
-}
+$date_creation_val = ''; // initialement vide
 
 print '<div class="form-group" style="margin-bottom:20px;">';
 print '<label for="date_creation" style="display:block; margin-bottom:6px; font-weight:600; color:#2c3e50;">';
 print '<i class="fa fa-calendar-alt"></i> '.$langs->trans("CreationDate").' :';
 print '</label>';
 print '<div style="position:relative; display:inline-block;">';
-print '<input type="datetime-local" id="date_creation" name="date_creation" value="'.$date_creation_val.'" ';
-print 'style="padding:10px 12px 10px 40px; border:2px solid #e0e0e0; border-radius:6px; ';
-print 'font-size:14px; width:220px; transition:all 0.3s ease; background:#fff; ';
+print '<input type="datetime-local" id="date_creation" name="date_creation" value="" required ';
+print 'style="padding:10px 12px 10px 40px; border:2px solid #e74c3c; border-radius:6px; ';
+print 'font-size:14px; width:250px; transition:all 0.3s ease; background:#fff; ';
 print 'color:#333; box-shadow:0 2px 5px rgba(0,0,0,0.05);" ';
-print 'onfocus="this.style.borderColor=\'#4a90e2\'; this.style.boxShadow=\'0 2px 8px rgba(74,144,226,0.2)\'" ';
-print 'onblur="this.style.borderColor=\'#e0e0e0\'; this.style.boxShadow=\'0 2px 5px rgba(0,0,0,0.05)\'">';
+print 'oninput="if(this.value){this.style.borderColor=\'#27ae60\'; this.style.boxShadow=\'0 2px 8px rgba(39,174,96,0.2)\';} else {this.style.borderColor=\'#e74c3c\'; this.style.boxShadow=\'0 2px 5px rgba(0,0,0,0.05)\';}">';
 print '<i class="fa fa-clock" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#7f8c8d;"></i>';
 print '</div>';
 print '</div>';
