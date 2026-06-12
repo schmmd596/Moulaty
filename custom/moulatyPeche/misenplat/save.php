@@ -211,7 +211,7 @@ try {
 llxHeader('', $langs->trans("Mise en Plat"));
 print load_fiche_titre($langs->trans("Erreur lors de la Mise en Plat"), '', 'fa-utensils');
 print '<div class="error">'.$langs->trans("Une erreur s’est produite pendant le traitement.").'</div>';
-print '<div class="center"><a class="button" href="./misenplat_select.php">'.$langs->trans("Retour").'</a></div>';
+print '<div class="center"><a class="button" href="./nouveau.php">'.$langs->trans("Retour").'</a></div>';
 
 llxFooter();
 $db->close();

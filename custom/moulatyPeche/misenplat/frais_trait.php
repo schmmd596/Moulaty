@@ -8,7 +8,7 @@ global $db, $user, $langs, $conf;
 $id = GETPOST('fk_bon', 'int');
 if (empty($id)) {
     setEventMessages("Bon non spécifié.", null, 'errors');
-    header("Location: misenplat_select.php");
+    header("Location: nouveau.php");
     exit;
 }
 

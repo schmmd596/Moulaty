@@ -11,7 +11,7 @@ $langs->load("womapeche@womapeche");
 $id = GETPOST('id','int');
 if (empty($id)) {
     setEventMessages($langs->trans("BonNotSpecified"), null, 'errors');
-    header("Location: misenplat_select.php");
+    header("Location: nouveau.php");
     exit;
 }
 

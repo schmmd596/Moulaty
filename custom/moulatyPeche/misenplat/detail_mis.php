@@ -19,7 +19,7 @@ $langs->loadLangs(['main', 'other', 'womapeche@womapeche']);
 $id = GETPOST('id', 'int');
 if (empty($id)) {
     setEventMessages($langs->trans("IdentifiantBonManquant"), null, 'errors');
-    header("Location: ./misenplat_select.php");
+    header("Location: ./nouveau.php");
     exit;
 }
 
@@ -37,7 +37,7 @@ $sql_bon = "SELECT b.*,
 $resql_bon = $db->query($sql_bon);
 if (!$resql_bon || $db->num_rows($resql_bon) == 0) {
     setEventMessages($langs->trans("BonMiseEnPlatIntrouvable"), null, 'errors');
-    header("Location: ./misenplat_select.php");
+    header("Location: ./nouveau.php");
     exit;
 }
 $bon = $db->fetch_object($resql_bon);

@@ -70,7 +70,8 @@ if ($id_lot > 0) {
                 p.label AS produit,
                 p.ref AS produit_ref,
                 s.nom AS fournisseur,
-                b.ref AS bon_ref
+                b.ref AS bon_ref,
+                b.fk_entrepot
             FROM ".MAIN_DB_PREFIX."pech_misenplat AS m
             INNER JOIN ".MAIN_DB_PREFIX."product AS p ON p.rowid = m.fk_product
             LEFT JOIN ".MAIN_DB_PREFIX."societe AS s ON s.rowid = m.fk_congelateur
@@ -92,12 +93,16 @@ if ($id_lot > 0) {
     $total_plats_mixte = 0;
     
     // ===============================
-// 🔥 REGROUPEMENT PAR PRODUIT
-// ===============================
-$produits_groupes = [];
-
-while ($obj = $db->fetch_object($resql)) {
-    $produit_id = $obj->produit_id;
+    // 🔥 REGROUPEMENT PAR PRODUIT
+    // ===============================
+    $produits_groupes = [];
+    $fk_entrepot_from_misenplat = 0;
+    
+    while ($obj = $db->fetch_object($resql)) {
+        if (empty($fk_entrepot_from_misenplat) && !empty($obj->fk_entrepot)) {
+            $fk_entrepot_from_misenplat = (int)$obj->fk_entrepot;
+        }
+        $produit_id = $obj->produit_id;
     $plats_disponibles = $obj->nombre_plat - $obj->nombre_plat_sortie;
     
     // Si c'est la première fois qu'on voit ce produit
@@ -149,6 +154,12 @@ foreach ($produits_groupes as $produit_id => $produit) {
     }
 }
 
+if (empty($fk_entrepot)) {
+    $fk_entrepot = $fk_entrepot_from_misenplat;
+    if ($entrepot->fetch((int) $fk_entrepot) > 0) {
+        $ref_entrepot = $entrepot->ref;
+    }
+}
 
 }
 

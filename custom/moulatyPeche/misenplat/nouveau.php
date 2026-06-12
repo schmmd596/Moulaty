@@ -96,78 +96,85 @@ print '<div class="selection-container">';
     // ============================================================================
     // 📋 Liste des produits issus des réceptions filtrées
     // ============================================================================
-    if ($fk_entrepot || $fk_fournisseur) {
-        $sql = "SELECT r.rowid as fk_reception, r.ref as reception_ref, r.fk_congelateur, s.nom as fournisseur,
-                       d.rowid as receptiondet_id, d.fk_product, 
-                       p.ref as product_ref, p.label as product_label,
-                       d.poids_net as quantite_totale,
-                       d.poids_plater as quantite_plater
-                FROM ".MAIN_DB_PREFIX."pech_receptiondet as d
-                INNER JOIN ".MAIN_DB_PREFIX."pech_reception as r ON r.rowid = d.fk_reception
-                LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = r.fk_congelateur
-                LEFT JOIN ".MAIN_DB_PREFIX."product as p ON p.rowid = d.fk_product
-                WHERE r.etat <> 0 and r.fk_bon_recep > 0" ;
+    $user_warehouses = get_user_entrepots();
 
-        if ($fk_entrepot > 0) {
-            $sql .= " AND r.fk_entrepot = ".((int) $fk_entrepot);
-        }
-        if ($fk_fournisseur > 0) {
-            $sql .= " AND r.fk_congelateur = ".((int) $fk_fournisseur);
-        }
+    $sql = "SELECT r.rowid as fk_reception, r.ref as reception_ref, r.fk_congelateur, s.nom as fournisseur,
+                   d.rowid as receptiondet_id, d.fk_product, 
+                   p.ref as product_ref, p.label as product_label,
+                   d.poids_net as quantite_totale,
+                   d.poids_plater as quantite_plater,
+                   r.fk_entrepot, e.ref as entrepot_ref
+            FROM ".MAIN_DB_PREFIX."pech_receptiondet as d
+            INNER JOIN ".MAIN_DB_PREFIX."pech_reception as r ON r.rowid = d.fk_reception
+            LEFT JOIN ".MAIN_DB_PREFIX."entrepot as e ON e.rowid = r.fk_entrepot
+            LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = r.fk_congelateur
+            LEFT JOIN ".MAIN_DB_PREFIX."product as p ON p.rowid = d.fk_product
+            WHERE r.etat <> 0 and r.fk_bon_recep > 0" ;
 
-        $sql .= " ORDER BY r.rowid DESC";
-        $resql = $db->query($sql);
+    if ($fk_entrepot > 0) {
+        $sql .= " AND r.fk_entrepot = ".((int) $fk_entrepot);
+    } elseif (!empty($user_warehouses)) {
+        $sql .= " AND r.fk_entrepot IN (".implode(',', array_map('intval', $user_warehouses)).")";
+    }
+    if ($fk_fournisseur > 0) {
+        $sql .= " AND r.fk_congelateur = ".((int) $fk_fournisseur);
+    }
 
-        print '<form method="POST" action="./misenplat_create.php">';
-        print '<input type="hidden" name="token" value="'.newToken().'">';
-        print '<input type="hidden" name="fk_entrepot" value="'.$fk_entrepot.'">';
+    $sql .= " ORDER BY r.rowid DESC";
+    $resql = $db->query($sql);
 
-        print '<div class="selection-section">';
-        print '<h3 class="selection-title"><i class="fa fa-list"></i> '.$langs->trans("ProduitsDisponibles").'</h3>';
+    print '<form method="POST" action="./misenplat_create.php">';
+    print '<input type="hidden" name="token" value="'.newToken().'">';
+    print '<input type="hidden" name="fk_entrepot" value="'.$fk_entrepot.'">';
 
-        if ($resql && $db->num_rows($resql) > 0) {
-            print '<div class="table-responsive">';
-            print '<table class="selection-table">';
-            print '<thead><tr>';
-            print '<th width="5%"><i class="fa fa-check"></i> '.$langs->trans("Selection").'</th>';
-            print '<th width="15%"><i class="fa fa-truck"></i> '.$langs->trans("Reception").'</th>';
-            print '<th width="20%"><i class="fa fa-user"></i> '.$langs->trans("Congelateur").'</th>';
-            print '<th width="20%"><i class="fa fa-box"></i> '.$langs->trans("Produit").'</th>';
-            print '<th width="12%" class="text-right"><i class="fa fa-weight-hanging"></i> '.$langs->trans("QuantiteTotale").' (kg)</th>';
-            print '<th width="12%" class="text-right"><i class="fa fa-check-circle"></i> '.$langs->trans("DejaPlate").' (kg)</th>';
-            print '<th width="12%" class="text-right"><i class="fa fa-hourglass-half"></i> '.$langs->trans("ResteAPlater").' (kg)</th>';
-            print '<th width="14%" class="center"><i class="fa fa-info-circle"></i> '.$langs->trans("Statut").'</th>';
-            print '</tr></thead>';
-            print '<tbody>';
+    print '<div class="selection-section">';
+    print '<h3 class="selection-title"><i class="fa fa-list"></i> '.$langs->trans("ProduitsDisponibles").'</h3>';
 
-            $has_products = false;
-            while ($obj = $db->fetch_object($resql)) {
-                $deja_plate = (int) $obj->quantite_plater;
-                $reste_a_plater = max(0, $obj->quantite_totale - $deja_plate);
-                
-                // Détermination du statut
-                if ($deja_plate <= 0) {
-                    $statut = '<span class="selection-badge badge-warning"><i class="fa fa-hourglass-start"></i> '.$langs->trans("EnReception").'</span>';
-                } elseif ($deja_plate >= $obj->quantite_totale) {
-                    $statut = '<span class="selection-badge badge-success"><i class="fa fa-check-circle"></i> '.$langs->trans("Termine").'</span>';
-                } else {
-                    $statut = '<span class="selection-badge badge-info"><i class="fa fa-spinner"></i> '.$langs->trans("EnTraitement").'</span>';
-                }
-                
-                if ($reste_a_plater > 0) {
-                    $has_products = true;
-                    print '<tr>';
-                    print '<td class="center"><input type="checkbox" name="selected[]" value="'.$obj->receptiondet_id.'" class="selection-checkbox"></td>';
-                    print '<td><strong>'.dol_escape_htmltag($obj->reception_ref).'</strong></td>';
-                    print '<td>'.dol_escape_htmltag($obj->fournisseur).'</td>';
-                    print '<td>'.dol_escape_htmltag($obj->product_ref.' - '.$obj->product_label).'</td>';
-                    print '<td class="text-right"><strong>'.price($obj->quantite_totale, 2, '', 1).' kg</strong></td>';
-                    print '<td class="text-right">'.price($deja_plate, 2, '', 1).' kg</td>';
-                    print '<td class="text-right"><strong style="color:#e74c3c;">'.price($reste_a_plater, 2, '', 1).' kg</strong></td>';
-                    print '<td class="center">'.$statut.'</td>';
-                    print '</tr>';
-                }
+    if ($resql && $db->num_rows($resql) > 0) {
+        print '<div class="table-responsive">';
+        print '<table class="selection-table">';
+        print '<thead><tr>';
+        print '<th width="5%"><i class="fa fa-check"></i> '.$langs->trans("Selection").'</th>';
+        print '<th width="15%"><i class="fa fa-truck"></i> '.$langs->trans("Reception").'</th>';
+        print '<th width="15%"><i class="fa fa-user"></i> '.$langs->trans("Congelateur").'</th>';
+        print '<th width="15%"><i class="fa fa-warehouse"></i> '.$langs->trans("Entrepot").'</th>';
+        print '<th width="15%"><i class="fa fa-box"></i> '.$langs->trans("Produit").'</th>';
+        print '<th width="10%" class="text-right"><i class="fa fa-weight-hanging"></i> '.$langs->trans("QuantiteTotale").' (kg)</th>';
+        print '<th width="10%" class="text-right"><i class="fa fa-check-circle"></i> '.$langs->trans("DejaPlate").' (kg)</th>';
+        print '<th width="10%" class="text-right"><i class="fa fa-hourglass-half"></i> '.$langs->trans("ResteAPlater").' (kg)</th>';
+        print '<th width="10%" class="center"><i class="fa fa-info-circle"></i> '.$langs->trans("Statut").'</th>';
+        print '</tr></thead>';
+        print '<tbody>';
+
+        $has_products = false;
+        while ($obj = $db->fetch_object($resql)) {
+            $deja_plate = (int) $obj->quantite_plater;
+            $reste_a_plater = max(0, $obj->quantite_totale - $deja_plate);
+            
+            // Détermination du statut
+            if ($deja_plate <= 0) {
+                $statut = '<span class="selection-badge badge-warning"><i class="fa fa-hourglass-start"></i> '.$langs->trans("EnReception").'</span>';
+            } elseif ($deja_plate >= $obj->quantite_totale) {
+                $statut = '<span class="selection-badge badge-success"><i class="fa fa-check-circle"></i> '.$langs->trans("Termine").'</span>';
+            } else {
+                $statut = '<span class="selection-badge badge-info"><i class="fa fa-spinner"></i> '.$langs->trans("EnTraitement").'</span>';
             }
+            
+            if ($reste_a_plater > 0) {
+                $has_products = true;
+                print '<tr>';
+                print '<td class="center"><input type="checkbox" name="selected[]" value="'.$obj->receptiondet_id.'" class="selection-checkbox"></td>';
+                print '<td><strong>'.dol_escape_htmltag($obj->reception_ref).'</strong></td>';
+                print '<td>'.dol_escape_htmltag($obj->fournisseur).'</td>';
+                print '<td>'.dol_escape_htmltag($obj->entrepot_ref).'</td>';
+                print '<td>'.dol_escape_htmltag($obj->product_ref.' - '.$obj->product_label).'</td>';
+                print '<td class="text-right"><strong>'.price($obj->quantite_totale, 2, '', 1).' kg</strong></td>';
+                print '<td class="text-right">'.price($deja_plate, 2, '', 1).' kg</td>';
+                print '<td class="text-right"><strong style="color:#e74c3c;">'.price($reste_a_plater, 2, '', 1).' kg</strong></td>';
+                print '<td class="center">'.$statut.'</td>';
+                print '</tr>';
+            }
+        }
 
             print '</tbody>';
             print '</table>';
@@ -197,7 +204,6 @@ print '<div class="selection-container">';
 
         print '</div>'; // .selection-section
         print '</form>';
-    }
 
 print '</div>'; // .selection-container
 

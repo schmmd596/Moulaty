@@ -25,35 +25,35 @@ $fk_entrepot = GETPOST('fk_entrepot', 'int');
 // ============================================================================
 if (empty($selected)) {
     setEventMessages($langs->trans("NoLinesSelected"), null, 'warnings');
-    header("Location: ./misenplat_select.php");
+    header("Location: ./nouveau.php");
     exit;
 }
-
-// ============================================================================
-// Récupération de l'entrepôt
-// ============================================================================
-$entrepot = new Entrepot($db);
-$entrepot->fetch($fk_entrepot);
 
 // ============================================================================
 // Récupération et regroupement des produits sélectionnés
 // ============================================================================
 $sql = "SELECT d.rowid as receptiondet_id, d.fk_product, p.ref as product_ref, p.label as product_label,
-               d.poids_net as quantite_totale, d.poids_plater as quantite_plater
+               d.poids_net as quantite_totale, d.poids_plater as quantite_plater,
+               r.fk_entrepot
         FROM ".MAIN_DB_PREFIX."pech_receptiondet as d
+        INNER JOIN ".MAIN_DB_PREFIX."pech_reception as r ON r.rowid = d.fk_reception
         INNER JOIN ".MAIN_DB_PREFIX."product as p ON p.rowid = d.fk_product
         WHERE d.rowid IN (".implode(',', array_map('intval', $selected)).")";
 
 $resql = $db->query($sql);
 if (!$resql || $db->num_rows($resql) == 0) {
     setEventMessages($langs->trans("NoDataFoundForSelectedLines"), null, 'warnings');
-    header("Location: ./misenplat_select.php");
+    header("Location: ./nouveau.php");
     exit;
 }
 
 // Regroupement par produit
 $produits = [];
+$fk_entrepot_from_reception = 0;
 while ($obj = $db->fetch_object($resql)) {
+    if (empty($fk_entrepot_from_reception) && !empty($obj->fk_entrepot)) {
+        $fk_entrepot_from_reception = (int)$obj->fk_entrepot;
+    }
     if (!isset($produits[$obj->fk_product])) {
         $produits[$obj->fk_product] = [
             'ref' => $obj->product_ref,
@@ -65,6 +65,16 @@ while ($obj = $db->fetch_object($resql)) {
     $produits[$obj->fk_product]['qte_totale'] += $obj->quantite_totale;
     $produits[$obj->fk_product]['qte_plater'] += $obj->quantite_plater;
 }
+
+if (empty($fk_entrepot)) {
+    $fk_entrepot = $fk_entrepot_from_reception;
+}
+
+// ============================================================================
+// Récupération de l'entrepôt
+// ============================================================================
+$entrepot = new Entrepot($db);
+$entrepot->fetch($fk_entrepot);
 
 // ============================================================================
 // Affichage
@@ -295,7 +305,7 @@ print '</table>';
 print '<div class="actions-section">';
 print '<input type="submit" class="btn btn-primary" name="action_save" value="'.$langs->trans("SavePlating").'">';
 print '&nbsp;&nbsp;';
-print '<a class="btn btn-cancel" href="./misenplat_select.php">'.$langs->trans("Cancel").'</a>';
+print '<a class="btn btn-cancel" href="./nouveau.php">'.$langs->trans("Cancel").'</a>';
 print '</div>';
 
 print '</form>';

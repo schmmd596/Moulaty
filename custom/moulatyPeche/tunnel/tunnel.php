@@ -29,8 +29,13 @@ if (!empty($fk_entrepot)) {
 // ============================================================================
 // 🔹 Liste des entrepôts
 // ============================================================================
-$entrepots = [];
-$sql_ent = "SELECT rowid, ref FROM ".MAIN_DB_PREFIX."entrepot ORDER BY ref ASC";
+$user_warehouses = get_user_entrepots();
+$entrepots = ['' => $langs->trans("Tous")];
+$sql_ent = "SELECT rowid, ref FROM ".MAIN_DB_PREFIX."entrepot";
+if (!empty($user_warehouses)) {
+    $sql_ent .= " WHERE rowid IN (".implode(',', array_map('intval', $user_warehouses)).")";
+}
+$sql_ent .= " ORDER BY ref ASC";
 $res_ent = $db->query($sql_ent);
 if ($res_ent) {
     while ($obj = $db->fetch_object($res_ent)) {
@@ -90,18 +95,9 @@ print '</form>';
 print '</div>'; // .filter-section
 
 // ============================================================================
-// 🧾 REQUÊTE PRINCIPALE : afficher les mises en plat selon l'entrepôt sélectionné
+// 🧾 REQUÊTE PRINCIPALE : afficher les mises en plat disponibles
 // ============================================================================
-if (empty($fk_entrepot) || $fk_entrepot <= 0) {
-    print '<div class="selection-empty">';
-    print '<i class="fa fa-info-circle"></i>';
-    print '<p><strong>'.$langs->trans("SelectionnezEntrepotAfficherResultats").'</strong></p>';
-    print '</div>';
-    print '</div>'; // .selection-container
-    llxFooter(); 
-    $db->close(); 
-    exit;
-}
+$user_warehouses = get_user_entrepots();
 
 $sql = "SELECT mp.rowid, mp.date_creation, mp.nombre_plat, mp.nombre_plat_sortie, mp.poids_plat, mp.statut,
                mp.fk_bon_misenplat, mp.pointeur,
@@ -111,7 +107,13 @@ $sql = "SELECT mp.rowid, mp.date_creation, mp.nombre_plat, mp.nombre_plat_sortie
         LEFT JOIN ".MAIN_DB_PREFIX."pech_bon_misenplat AS b ON b.rowid = mp.fk_bon_misenplat
         LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e ON e.rowid = b.fk_entrepot
         LEFT JOIN ".MAIN_DB_PREFIX."product AS p ON p.rowid = mp.fk_product
-        WHERE b.fk_entrepot = ".((int)$fk_entrepot)." and b.statut > 0 and mp.nombre_plat > nombre_plat_sortie ";
+        WHERE b.statut > 0 and mp.nombre_plat > nombre_plat_sortie ";
+
+if ($fk_entrepot > 0) {
+    $sql .= " AND b.fk_entrepot = ".((int)$fk_entrepot);
+} elseif (!empty($user_warehouses)) {
+    $sql .= " AND b.fk_entrepot IN (".implode(',', array_map('intval', $user_warehouses)).")";
+}
 
 if (!empty($date_start)) $sql .= " AND mp.date_creation >= '".$db->escape($date_start)." 00:00:00'";
 if (!empty($date_end))   $sql .= " AND mp.date_creation <= '".$db->escape($date_end)." 23:59:59'";
