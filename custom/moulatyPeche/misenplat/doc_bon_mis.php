@@ -163,7 +163,9 @@ if (!empty($lines)) {
     $pdf->SetFillColor(200, 200, 200);
     $pdf->SetTextColor(0, 0, 0);
     $textTotal = dol_html_entity_decode($langs->trans("Total"), ENT_QUOTES, 'UTF-8');
-    $pdf->Cell($headerWidths[0] + $headerWidths[1] + $headerWidths[2], 7, $textTotal, 1, 0, 'R', 1);
+    $pdf->Cell($headerWidths[0], 7, $textTotal, 1, 0, 'L', 1);
+    $pdf->Cell($headerWidths[1], 7, number_format($total_nb, 0, ',', ' '), 1, 0, 'C', 1);
+    $pdf->Cell($headerWidths[2], 7, '', 1, 0, 'C', 1);
     $pdf->Cell($headerWidths[3], 7, number_format($total_poids, 2, ',', ' ').' kg', 1, 1, 'R', 1);
     
     $pdf->Ln(10);
