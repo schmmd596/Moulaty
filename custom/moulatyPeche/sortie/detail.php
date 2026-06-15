@@ -348,8 +348,8 @@ print '<div class="detail-container">';
         }
 
         if ($sortie->fk_bonsortie > 0) {
-            $url_bon = 'bonsortie_document.php?id='.$sortie->fk_bonsortie;
-            print '<a href="'.$url_bon.'" class="detail-button detail-button-info"><i class="fa fa-eye"></i> '.$langs->trans("VoirBonSortie").'</a>';
+            $url_bon = 'bonsortie_document.php?id_sortie='.$id;
+            print '<a href="'.$url_bon.'" target="_blank" class="detail-button detail-button-info"><i class="fa fa-file-pdf"></i> '.$langs->trans("VoirBonSortie").'</a>';
         } else {
             $url_creer = 'bon_sortie.php?id_sortie='.$id;
             print '<a href="'.$url_creer.'" class="detail-button detail-button-success"><i class="fa fa-plus-circle"></i> '.$langs->trans("CreerBonSortie").'</a>';
@@ -390,12 +390,8 @@ print '<div class="detail-container">';
         print '<a href="lot_sortis.php?id='.$id.'" class="detail-button detail-button-success"><i class="fa fa-eye"></i> '.$langs->trans("Details").'</a>';
 
         if ($sortie->fk_bonsortie > 0) {
-            if ($sortie->type == 0) {
-                $url_bon = 'bonsortie_document.php?id='.$sortie->fk_bonsortie;
-            } else {
-                $url_bon = 'bonsortie_document.php?id='.$sortie->fk_bonsortie;
-            }
-            print '<a href="'.$url_bon.'" class="detail-button detail-button-info"><i class="fa fa-eye"></i> '.$langs->trans("VoirBonSortie").'</a>';
+            $url_bon = 'bonsortie_document.php?id_sortie='.$id;
+            print '<a href="'.$url_bon.'" target="_blank" class="detail-button detail-button-info"><i class="fa fa-file-pdf"></i> '.$langs->trans("VoirBonSortie").'</a>';
         }
 
         if (!empty($sortie->fk_facture_client)) {

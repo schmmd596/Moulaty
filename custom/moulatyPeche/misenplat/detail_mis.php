@@ -193,7 +193,7 @@ print '<div class="detail-container">';
             break;
 
         case 1:
-            print '<a href="./doc_bon_mis.php?id='.$bon->rowid.'" target="_blank" class="detail-button detail-button-primary"><i class="fa fa-file-pdf"></i> '.$langs->trans("VoirBon").'</a>';
+            print '<a href="./doc_bon_mis.php?id='.$bon->rowid.'" target="_blank" class="detail-button detail-button-primary"><i class="fa fa-file-pdf"></i> Bon de Mise en Plat</a>';
             print '<a href="./brouillon.php?id='.$bon->rowid.'"class="detail-button  detail-button-danger" onclick="return confirm(\''.$langs->trans("ConfirmRevertReception").'\')"><i class="fa fa-undo"></i> '.$langs->trans("RevenirBrouillon").'</a>';
             if ($bon->fk_facture_frais > 0) {
                 print '<a href="'.DOL_URL_ROOT.'/fourn/facture/card.php?id='.$bon->fk_facture_frais.'" class="detail-button detail-button-info"><i class="fa fa-file-invoice-dollar"></i> '.$langs->trans("VoirFacture").'</a>';

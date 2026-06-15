@@ -54,7 +54,7 @@ if ($id_sortie > 0) {
 // ============================================================================
 // 🔹 VALIDATION ENTREPÔTS
 // ============================================================================
-if ($fk_entrepot_source == $fk_entrepot_dest) {
+if ($fk_entrepot_dest > 0 && $fk_entrepot_source == $fk_entrepot_dest) {
     setEventMessages($langs->trans("ErreurEntrepotsIdentiques"), null, 'errors');
     $previous = $_SERVER['HTTP_REFERER'] ?? 'sortie_card.php';
     header("Location: $previous");

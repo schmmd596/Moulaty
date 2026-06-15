@@ -11,50 +11,53 @@ $langs->loadLangs(["main", "abricot@abricot", "womapeche@womapeche"]);
 // 🔹 VÉRIFICATION DES PARAMÈTRES
 // ============================================================================
 $id = GETPOST('id', 'int');
-if ($id <= 0) accessforbidden(dol_html_entity_decode($langs->trans("IdentifiantBonSortieInvalide"), ENT_QUOTES, 'UTF-8'));
+$id_sortie = GETPOST('id_sortie', 'int');
 
-// ============================================================================
-// 🔹 RÉCUPÉRATION DU BON DE SORTIE PRINCIPAL
-// ============================================================================
-$sqlBon = "SELECT b.rowid, b.ref, b.date_creation, b.statut,
-                  e1.ref AS entrepot_source_ref, 
-                  e2.ref AS entrepot_dest_ref,
-                  u.login AS utilisateur, 
-                  b.commentaire
-           FROM ".MAIN_DB_PREFIX."pech_bonsortie AS b
-           LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e1 ON e1.rowid = b.fk_entrepot_source
-           LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e2 ON e2.rowid = b.fk_entrepot_dest
-           LEFT JOIN ".MAIN_DB_PREFIX."user AS u ON u.rowid = b.fk_user_create
-           WHERE b.rowid = ".((int)$id);
-
-$resBon = $db->query($sqlBon);
-if (!$resBon || $db->num_rows($resBon) == 0) {
-    exit(dol_html_entity_decode($langs->trans('BonSortieIntrouvable'), ENT_QUOTES, 'UTF-8'));
+if ($id <= 0 && $id_sortie <= 0) {
+    accessforbidden(dol_html_entity_decode($langs->trans("IdentifiantBonSortieInvalide"), ENT_QUOTES, 'UTF-8'));
 }
-$bon = $db->fetch_object($resBon);
 
-// ============================================================================
-// 🔹 RÉCUPÉRATION DU TYPE DE SORTIE ET DU CLIENT
-// ============================================================================
-$sqlSortie = "SELECT type, fk_client, fk_facture
-              FROM ".MAIN_DB_PREFIX."pech_sortie 
-              WHERE fk_bonsortie = ".((int)$id)."
-              LIMIT 1";
+if ($id_sortie > 0) {
+    // ============================================================================
+    // 🔹 RÉCUPÉRATION DE LA SORTIE INDIVIDUELLE ET ADAPTATION AU BON DE SORTIE
+    // ============================================================================
+    $sqlSortie = "SELECT s.rowid, s.ref, s.date_creation, s.statut, s.type, s.fk_client, s.fk_facture,
+                         e1.ref AS entrepot_source_ref, 
+                         e2.ref AS entrepot_dest_ref,
+                         u.login AS utilisateur, 
+                         s.commentaire,
+                         s.fk_bonsortie
+                  FROM ".MAIN_DB_PREFIX."pech_sortie AS s
+                  LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e1 ON e1.rowid = s.fk_entrepot_source
+                  LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e2 ON e2.rowid = s.fk_entrepot_dest
+                  LEFT JOIN ".MAIN_DB_PREFIX."user AS u ON u.rowid = s.fk_user
+                  WHERE s.rowid = ".((int)$id_sortie);
 
-$resSortie = $db->query($sqlSortie);
-$sortie_type = null;
-$sortie_fk_client = 0;
-$total_facture = 0;
-
-if ($resSortie && $db->num_rows($resSortie) > 0) {
-    $objSortie = $db->fetch_object($resSortie);
-    $sortie_type = (int)$objSortie->type;
-    $sortie_fk_client = (int)$objSortie->fk_client;
+    $resSortie = $db->query($sqlSortie);
+    if (!$resSortie || $db->num_rows($resSortie) == 0) {
+        exit(dol_html_entity_decode($langs->trans('SortieIntrouvable'), ENT_QUOTES, 'UTF-8'));
+    }
+    $sortie = $db->fetch_object($resSortie);
     
-    if ($objSortie->fk_facture > 0) {
+    // On mappe la sortie sur l'objet $bon pour réutiliser le code existant
+    $bon = new stdClass();
+    $bon->rowid = $sortie->rowid;
+    $bon->ref = $sortie->ref;
+    $bon->date_creation = $sortie->date_creation;
+    $bon->statut = $sortie->statut;
+    $bon->entrepot_source_ref = $sortie->entrepot_source_ref;
+    $bon->entrepot_dest_ref = $sortie->entrepot_dest_ref;
+    $bon->utilisateur = $sortie->utilisateur;
+    $bon->commentaire = $sortie->commentaire;
+
+    $sortie_type = (int)$sortie->type;
+    $sortie_fk_client = (int)$sortie->fk_client;
+    $total_facture = 0;
+
+    if ($sortie->fk_facture > 0) {
         $sqlFact = "SELECT total_ttc 
                     FROM ".MAIN_DB_PREFIX."facture_fourn 
-                    WHERE rowid = ".((int)$objSortie->fk_facture);
+                    WHERE rowid = ".((int)$sortie->fk_facture);
 
         $resFact = $db->query($sqlFact);
         if ($resFact && $db->num_rows($resFact) > 0) {
@@ -62,44 +65,138 @@ if ($resSortie && $db->num_rows($resSortie) > 0) {
             $total_facture = (float)$fobj->total_ttc;
         }
     }
-}
 
-// ============================================================================
-// 🔹 RÉCUPÉRATION DES LIGNES PRODUITS
-// ============================================================================
-$sqlProd = "SELECT d.rowid, d.fk_product, d.nb_carton, d.poids_carton, d.valeur,
-                   p.ref AS product_ref, p.label AS product_label,
-                   (d.nb_carton * d.poids_carton) AS total_poids
-            FROM ".MAIN_DB_PREFIX."pech_bonsortie_detprod AS d
-            LEFT JOIN ".MAIN_DB_PREFIX."product AS p ON p.rowid = d.fk_product
-            WHERE d.fk_bonentree = ".((int)$id);
+    // Récupération des produits depuis pech_sortiedetprod
+    $sqlProd = "SELECT d.rowid, d.fk_product, d.nb_carton,
+                       (d.poids_total / d.nb_carton) AS poids_carton,
+                       p.ref AS product_ref, p.label AS product_label,
+                       (d.nb_carton * (d.poids_total / d.nb_carton)) AS total_poids,
+                       (SELECT SUM(c.prix_moyen + c.frais) FROM ".MAIN_DB_PREFIX."pech_sortiedetcarton sc LEFT JOIN ".MAIN_DB_PREFIX."pech_carton c ON c.rowid = sc.fk_carton WHERE sc.fk_sortiedetprod = d.rowid) AS valeur
+                FROM ".MAIN_DB_PREFIX."pech_sortiedetprod AS d
+                LEFT JOIN ".MAIN_DB_PREFIX."product AS p ON p.rowid = d.fk_product
+                WHERE d.fk_sortie = ".((int)$id_sortie);
 
-$resProd = $db->query($sqlProd);
-$linesProd = [];
-$total_poids_produits = 0;
-$total_valeur_produits = 0;
+    $resProd = $db->query($sqlProd);
+    $linesProd = [];
+    $total_poids_produits = 0;
+    $total_valeur_produits = 0;
+    $total_cartons_all = 0;
 
-while ($obj = $db->fetch_object($resProd)) {
-    $linesProd[] = $obj;
-    $total_poids_produits += $obj->total_poids;
-    $total_valeur_produits += $obj->valeur;
-    $total_cartons_all += $obj->nb_carton;
-}
+    while ($obj = $db->fetch_object($resProd)) {
+        $linesProd[] = $obj;
+        $total_poids_produits += $obj->total_poids;
+        $total_valeur_produits += $obj->valeur;
+        $total_cartons_all += $obj->nb_carton;
+    }
 
-// ============================================================================
-// 🔹 RÉCUPÉRATION DES LIGNES SERVICES
-// ============================================================================
-$sqlServ = "SELECT rowid, description, qte, pu, total
-            FROM ".MAIN_DB_PREFIX."pech_bonsortie_detserv
-            WHERE fk_bonentree = ".((int)$id);
+    // Récupération des services
+    $linesServ = [];
+    $total_montant_services = 0;
 
-$resServ = $db->query($sqlServ);
-$linesServ = [];
-$total_montant_services = 0;
+    // Si la sortie a déjà un bon de sortie, récupérer les services enregistrés dessus
+    if ($sortie->fk_bonsortie > 0) {
+        $sqlServ = "SELECT rowid, description, qte, pu, total
+                    FROM ".MAIN_DB_PREFIX."pech_bonsortie_detserv
+                    WHERE fk_bonentree = ".((int)$sortie->fk_bonsortie);
 
-while ($obj = $db->fetch_object($resServ)) {
-    $linesServ[] = $obj;
-    $total_montant_services += $obj->total;
+        $resServ = $db->query($sqlServ);
+        if ($resServ) {
+            while ($obj = $db->fetch_object($resServ)) {
+                $linesServ[] = $obj;
+                $total_montant_services += $obj->total;
+            }
+        }
+    }
+} else {
+    // ============================================================================
+    // 🔹 RÉCUPÉRATION DU BON DE SORTIE PRINCIPAL
+    // ============================================================================
+    $sqlBon = "SELECT b.rowid, b.ref, b.date_creation, b.statut,
+                      e1.ref AS entrepot_source_ref, 
+                      e2.ref AS entrepot_dest_ref,
+                      u.login AS utilisateur, 
+                      b.commentaire
+               FROM ".MAIN_DB_PREFIX."pech_bonsortie AS b
+               LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e1 ON e1.rowid = b.fk_entrepot_source
+               LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS e2 ON e2.rowid = b.fk_entrepot_dest
+               LEFT JOIN ".MAIN_DB_PREFIX."user AS u ON u.rowid = b.fk_user_create
+               WHERE b.rowid = ".((int)$id);
+
+    $resBon = $db->query($sqlBon);
+    if (!$resBon || $db->num_rows($resBon) == 0) {
+        exit(dol_html_entity_decode($langs->trans('BonSortieIntrouvable'), ENT_QUOTES, 'UTF-8'));
+    }
+    $bon = $db->fetch_object($resBon);
+
+    // ============================================================================
+    // 🔹 RÉCUPÉRATION DU TYPE DE SORTIE ET DU CLIENT
+    // ============================================================================
+    $sqlSortie = "SELECT type, fk_client, fk_facture
+                  FROM ".MAIN_DB_PREFIX."pech_sortie 
+                  WHERE fk_bonsortie = ".((int)$id)."
+                  LIMIT 1";
+
+    $resSortie = $db->query($sqlSortie);
+    $sortie_type = null;
+    $sortie_fk_client = 0;
+    $total_facture = 0;
+
+    if ($resSortie && $db->num_rows($resSortie) > 0) {
+        $objSortie = $db->fetch_object($resSortie);
+        $sortie_type = (int)$objSortie->type;
+        $sortie_fk_client = (int)$objSortie->fk_client;
+        
+        if ($objSortie->fk_facture > 0) {
+            $sqlFact = "SELECT total_ttc 
+                        FROM ".MAIN_DB_PREFIX."facture_fourn 
+                        WHERE rowid = ".((int)$objSortie->fk_facture);
+
+            $resFact = $db->query($sqlFact);
+            if ($resFact && $db->num_rows($resFact) > 0) {
+                $fobj = $db->fetch_object($resFact);
+                $total_facture = (float)$fobj->total_ttc;
+            }
+        }
+    }
+
+    // ============================================================================
+    // 🔹 RÉCUPÉRATION DES LIGNES PRODUITS
+    // ============================================================================
+    $sqlProd = "SELECT d.rowid, d.fk_product, d.nb_carton, d.poids_carton, d.valeur,
+                       p.ref AS product_ref, p.label AS product_label,
+                       (d.nb_carton * d.poids_carton) AS total_poids
+                FROM ".MAIN_DB_PREFIX."pech_bonsortie_detprod AS d
+                LEFT JOIN ".MAIN_DB_PREFIX."product AS p ON p.rowid = d.fk_product
+                WHERE d.fk_bonentree = ".((int)$id);
+
+    $resProd = $db->query($sqlProd);
+    $linesProd = [];
+    $total_poids_produits = 0;
+    $total_valeur_produits = 0;
+    $total_cartons_all = 0;
+
+    while ($obj = $db->fetch_object($resProd)) {
+        $linesProd[] = $obj;
+        $total_poids_produits += $obj->total_poids;
+        $total_valeur_produits += $obj->valeur;
+        $total_cartons_all += $obj->nb_carton;
+    }
+
+    // ============================================================================
+    // 🔹 RÉCUPÉRATION DES LIGNES SERVICES
+    // ============================================================================
+    $sqlServ = "SELECT rowid, description, qte, pu, total
+                FROM ".MAIN_DB_PREFIX."pech_bonsortie_detserv
+                WHERE fk_bonentree = ".((int)$id);
+
+    $resServ = $db->query($sqlServ);
+    $linesServ = [];
+    $total_montant_services = 0;
+
+    while ($obj = $db->fetch_object($resServ)) {
+        $linesServ[] = $obj;
+        $total_montant_services += $obj->total;
+    }
 }
 
 // ============================================================================
